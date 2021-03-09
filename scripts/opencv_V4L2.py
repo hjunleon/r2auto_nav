@@ -12,6 +12,12 @@ import cv2
 import os
 import v4l2capture
 import select
+import argparse
+
+# variables
+radius = 41
+bg_threshold = 0  # 0 to 255
+
 
 if __name__ == '__main__':
     # Open the video device.
@@ -40,18 +46,26 @@ if __name__ == '__main__':
         # Wait for the device to fill the buffer.
         select.select((video,), (), ())
 
-        # The rest is easy :-)
+        # OpenCV stuffs
         image_data = video.read_and_queue()
+        frames = cv2.imdecode(np.frombuffer(image_data, dtype=np.uint8), cv2.cv.CV_LOAD_IMAGE_GRAYSCALE)
+        ret, thresh1 = cv2.threshold(frames, 127, 255, cv2.THRESH_BINARY)
+        orig = frames.copy()
+        # frames = cv2.cvtColor(frames, cv2.COLOR_BGR2GRAY)
 
-        print("decode")
-        frame = cv2.imdecode(np.frombuffer(image_data, dtype=np.uint8), cv2.cv.CV_LOAD_IMAGE_COLOR)
+        # apply a Gaussian blur to the image then find the brightest
+        # region
+        thresh1 = cv2.GaussianBlur(thresh1, (radius, radius), 0)
+        (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(frames)
+        frames = orig.copy()
+        cv2.circle(frames, maxLoc, radius, (255, 0, 0), 2)
 
-        cv2.imshow('frame', frame)
+        cv2.imshow('Video Stream', frames)
+
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):
             break
 
     # cap.release()
     video.close()
-
     cv2.destroyAllWindows()
