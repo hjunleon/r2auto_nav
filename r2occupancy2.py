@@ -22,7 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import math
-import scipy.stats
+from scipy import stats
 
 # constants
 occ_bins = [-1, 0, 50, 100]
@@ -71,7 +71,7 @@ class Occupy(Node):
         # compute histogram to identify bins with -1, values between 0 and below 50, 
         # and values between 50 and 100. The binned_statistic function will also
         # return the bin numbers so we can use that easily to create the image 
-        occ_counts, edges, binnum = scipy.stats.binned_statistic(occdata, np.nan, statistic='count', bins=occ_bins)
+        occ_counts, edges, binnum = stats.binned_statistic(occdata, np.nan, statistic='count', bins=occ_bins)
         # get width and height of map
         iwidth = msg.info.width
         iheight = msg.info.height
