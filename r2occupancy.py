@@ -40,17 +40,19 @@ class Occupy(Node):
     def listener_callback(self, msg):
         # create numpy array
         occdata = np.array(msg.data)
+        print(occdata.shape)
         # compute histogram to identify bins with -1, values between 0 and below 50, 
         # and values between 50 and 100. The binned_statistic function will also
         # return the bin numbers so we can use that easily to create the image 
         occ_counts, edges, binnum = scipy.stats.binned_statistic(occdata, np.nan, statistic='count', bins=occ_bins)
+        print(edges)
         # get width and height of map
         iwidth = msg.info.width
         iheight = msg.info.height
         # calculate total number of bins
         total_bins = iwidth * iheight
         # log the info
-        # self.get_logger().info('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i' % (occ_counts[0], occ_counts[1], occ_counts[2], total_bins))
+        self.get_logger().info('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i' % (occ_counts[0], occ_counts[1], occ_counts[2], total_bins))
 
         # binnum go from 1 to 3 so we can use uint8
         # convert into 2D array using column order
