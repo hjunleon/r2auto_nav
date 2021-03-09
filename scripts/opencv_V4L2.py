@@ -2,21 +2,43 @@
 References:
 https://www.pyimagesearch.com/2014/09/29/finding-brightest-spot-image-using-python-opencv/
 https://gist.github.com/royshil/0f674c96281b686a9a62
+https://docs.opencv.org/master/d7/d4d/tutorial_py_thresholding.html
+https://roboticsbackend.com/ros2-python-publisher-example/
 '''
 
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 
 import numpy as np
 import cv2
-import os
 import v4l2capture
 import select
-import argparse
+import rclpy
+from rclpy.node import Node
+
+from example_interfaces.msg import Int64
 
 # variables
-radius = 41
-bg_threshold = 0  # 0 to 255
+radius = 41  # radius of circle
+bg_threshold = 127  # 0 to 255
+
+
+class CVCommandsNode(Node):
+    def __int__(self):
+        super().__init__('cv_commands')
+        self.cv_commands_publisher_ = self.create_publisher(Int64, 'cv_commands', 30)
+
+    def publish_cv_commands(self):
+        command = 0
+        msg = Int64
+        msg.data = command
+        self.cv_commands_publisher_.publish(msg)
+        self.cv_command_timer_ = self.create_timer(0.1, self.publish_cv_commands)
+
+def main(args=None):
+    rclpy.init(args=args)
+    command_node = CVCommandsNode()
+    rclpy.spin(command_node)
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
@@ -49,7 +71,7 @@ if __name__ == '__main__':
         # OpenCV stuffs
         image_data = video.read_and_queue()
         frames = cv2.imdecode(np.frombuffer(image_data, dtype=np.uint8), cv2.cv.CV_LOAD_IMAGE_GRAYSCALE)
-        ret, thresh1 = cv2.threshold(frames, 127, 255, cv2.THRESH_BINARY)
+        ret, thresh1 = cv2.threshold(frames, bg_threshold, 255, cv2.THRESH_BINARY)
         orig = frames.copy()
         # frames = cv2.cvtColor(frames, cv2.COLOR_BGR2GRAY)
 
