@@ -108,7 +108,7 @@ class AutoNav(Node):
         # self.get_logger().info('In occ_callback')
         # create numpy array
         print("msg")
-        print(msg)
+        #print(msg)
         print(len(msg.data))
         msgdata = np.array(msg.data)
         #[print(x) for x in msgdata]
@@ -126,6 +126,7 @@ class AutoNav(Node):
         #self.occdata = np.uint8(oc2.reshape(msg.info.height,msg.info.width,order='F'))
         self.occdata = np.uint8(oc2.reshape(msg.info.height,msg.info.width))
         # print to file
+        
         np.savetxt("occupancy_msg_data.txt", msg.data)
         np.savetxt(mapfile, self.occdata)
 
@@ -234,7 +235,7 @@ class AutoNav(Node):
 
             # find direction with the largest distance from the Lidar,
             # rotate to that direction, and start moving
-            self.pick_direction()
+            #self.pick_direction()
 
             while rclpy.ok():
                 if self.laser_range.size != 0:
@@ -244,6 +245,7 @@ class AutoNav(Node):
                     # self.get_logger().info('Distances: %s' % str(lri))
 
                     # if the list is not empty
+                    """
                     if(len(lri[0])>0):
                         # stop moving
                         self.stopbot()
@@ -251,7 +253,7 @@ class AutoNav(Node):
                         # rotate to that direction
                         # start moving
                         self.pick_direction()
-                    
+                    """
                 # allow the callback functions to run
                 rclpy.spin_once(self)
 
