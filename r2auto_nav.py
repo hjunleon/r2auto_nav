@@ -100,6 +100,7 @@ class AutoNav(Node):
 
     def odom_callback(self, msg):
         # self.get_logger().info('In odom_callback')
+        print(msg)
         orientation_quat =  msg.pose.pose.orientation
         self.roll, self.pitch, self.yaw = euler_from_quaternion(orientation_quat.x, orientation_quat.y, orientation_quat.z, orientation_quat.w)
 
@@ -107,15 +108,15 @@ class AutoNav(Node):
     def occ_callback(self, msg):
         # self.get_logger().info('In occ_callback')
         # create numpy array
-        print("msg")
+        #print("msg")
         #print(msg)
-        print(len(msg.data))
+      #  print(len(msg.data))
         msgdata = np.array(msg.data)
         #[print(x) for x in msgdata]
         # compute histogram to identify percent of bins with -1
         occ_counts = np.histogram(msgdata,occ_bins)
         # calculate total number of bins
-        print(occ_counts)
+    #    print(occ_counts)
         total_bins = msg.info.width * msg.info.height
         # log the info
         self.get_logger().info('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i' % (occ_counts[0][0], occ_counts[0][1], occ_counts[0][2], total_bins))
