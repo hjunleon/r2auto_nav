@@ -5,6 +5,7 @@
 
 #to add
 #GPIO.cleanup, pwm.stop(), to do this, need to check if the balls have been fired
+#add code to move top layer back to x and y
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int8MultiArray
@@ -26,6 +27,7 @@ SPR = 200 #steps per revolution, 360/1.8
 delay = 0.005 / 32
 CW = 1 #clockwise
 CCW = 0 #counter clockwise
+complete = 0 #turns to 1 when firing is complete, controlled by a timer
 
 #setting up pins
 GPIO.setmode(BCM)
@@ -40,6 +42,7 @@ GPIO.setup(DCB_2, GPIO.OUT)
 servo = GPIO.PWM(Servo_PWM, 50) #servo pwm pin at 50hz
 shoot_motors = GPIO.PWM(DC_PWM, 1000) #firing motors pwm pin at 1000 hz
 servo.start(0)
+shoot_motors.start(0)
 
 # com_array = [0,0] #x and y coordinate
 def move_x(array):
@@ -78,11 +81,26 @@ def move_y(array):
 
     prev_angle = angle #check whats the prev angle
 
+#power on dc motors when target is cited, stop powering when target has been shot
 def fire(array):
-    if array[2] == 1: #1 for target found
+    speed = 100 #0 - 100
+    if array[2] == 1 and complete == 0: #1 for target found
+        shoot_motors.ChangeDutyCycle(speed)
         GPIO.output(DCT_2, LOW)
         GPIO.output(DCB_2, LOW)
+
+    if complete == 1:
+        shoot_motors.ChangeDutyCycle(0)
+        GPIO.output(DCT_2, LOW)
+        GPIO.output(DCB_2, LOW)
+
+def timer(array):
+    if array[2] == 1 and complete == 0:
+        #insert timer code, 40 seconds
+        #if 40 seconds have passed, complete  = 1
+
     return
+
 
 
 class Firing_Sys(Node):
@@ -97,10 +115,11 @@ class Firing_Sys(Node):
         self.subscription  # prevent unused variable warning
 
     def callback(self, com_array):
-        #while true for now, change to while balls have not been shot
-        move_x(com_array.data)
-        move_y(com_array.data)
-        fire(com_array.data)
+        if complete == 0:
+            move_x(com_array.data)
+            move_y(com_array.data)
+            fire(com_array.data)
+            timer(com_array.data)
 
 def main(args=None):
     rclpy.init(args=args)
