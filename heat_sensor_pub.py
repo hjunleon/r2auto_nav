@@ -13,62 +13,98 @@ http://docs.ros.org/en/rolling/Tutorials/Writing-A-Simple-Py-Publisher-And-Subsc
 ### ROS imports
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray
+from std_msgs.msg import Int8MultiArray, Float32MultiArray
 
 ### RPi Imports
-import sys
-import os.path
-
-# this is done for the AMG88xx folder (you may have to rewrite this to include the path of your AMG file)
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from Adafruit_AMG88xx import Adafruit_AMG88xx
-from time import sleep
 import time
-import matplotlib as mpl
+import busio
+import board
+import adafruit_amg88xx
+i2c = busio.I2C(board.SCL, board.SDA)
+amg = adafruit_amg88xx.AMG88XX(i2c)
 
-mpl.use('tkagg')  # to enable real-time plotting in Raspberry Pi
-import matplotlib.pyplot as plt
-import numpy as np
-
-sensor = Adafruit_AMG88xx()
 # wait for AMG to boot
-sleep(0.1)
-
-# preallocating variables
-norm_pix = []
-cal_vec = []
-kk = 0
-cal_size = 10  # size of calibration
-cal_pix = []
-time_prev = time.time()  # time for analyzing time between plot updates
+time.sleep(0.1)
 
 
-class HeatNode(Node):
+class HeatArray(Node):
 
     def __init__(self):
         super().__init__('heat_array')
-        self.publisher_ = self.create_publisher(Int8MultiArray, 'heat_array', 10)
+        self.publisher_ = self.create_publisher(Float32MultiArray, 'heat_array', 10)
         timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.timer = self.create_timer(timer_period, self.callback)
 
-    def timer_callback(self):
-        msg = Int8MultiArray()
-        msg.data = [0, 0]
+    def callback(self):
+        msg = Float32MultiArray()
+        msg.data = amg
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % str(msg.data))
 
 
-def main(args=None):
+class CommandNode(Node):
 
+    def __init__(self):
+        super().__init__('com_array')
+        self.publisher_ = self.create_publisher(Int8MultiArray, 'com_array', 10)
+        timer_period = 0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.callback)
+
+    def callback(self):
+        msg = Int8MultiArray()
+        msg.data = command()
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.data)
+
+
+def bright_loc():
+    amg_array = amg.pixels
+    highest_temp = 30  # threshold
+    coord = [0, 0, 0]  # x, y, on or off
+    for r in range(len(amg_array)):
+        for c in range(len(r)):
+            if amg_array[r][c] > highest_temp:
+                highest_temp = amg_array[r][c]
+                coord[0], coord[1] = r, c
+
+    return coord
+
+
+def command():
+
+    # -1 == left, down
+    # 0 == stop motion
+    # 1 == right, up
+    coord = bright_loc()
+    comm = [0, 0, 0]
+    if coord[0] == 3 or coord[0] == 4:
+        comm[0] = 0
+    elif coord[0] < 3:
+        comm[0] = -1
+    else:
+        comm[0] = 1
+
+    if coord[1] == 3 or coord[1] == 4:
+        comm[1] = 0
+    elif coord[1] < 3:
+        comm[1] = -1
+    else:
+        comm[1] = 1
+
+    return comm
+
+
+def main(args=None):
     rclpy.init(args=args)
-    heat_node = HeatNode()
-    rclpy.spin(heat_node)
+    heat_array = HeatArray()
+    rclpy.spin(heat_array)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    heat_node.destroy_node()
+    heat_array.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
