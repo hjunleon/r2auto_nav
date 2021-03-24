@@ -87,13 +87,14 @@ class Occupy(Node):
         except (LookupException, ConnectivityException, ExtrapolationException) as e:
             self.get_logger().info('No transformation found')
             return
-            
+        
+        print(trans)
         cur_pos = trans.transform.translation
         cur_rot = trans.transform.rotation
-        # self.get_logger().info('Trans: %f, %f' % (cur_pos.x, cur_pos.y))
+        self.get_logger().info('Trans: %f, %f' % (cur_pos.x, cur_pos.y))
         # convert quaternion to Euler angles
         roll, pitch, yaw = euler_from_quaternion(cur_rot.x, cur_rot.y, cur_rot.z, cur_rot.w)
-        # self.get_logger().info('Rot-Yaw: R: %f D: %f' % (yaw, np.degrees(yaw)))
+        self.get_logger().info('Rot-Yaw: Rad: %f Deg: %f' % (yaw, np.degrees(yaw)))
 
         # get map resolution
         map_res = msg.info.resolution
@@ -102,7 +103,7 @@ class Occupy(Node):
         # get map grid positions for x, y position
         grid_x = round((cur_pos.x - map_origin.x) / map_res)
         grid_y = round(((cur_pos.y - map_origin.y) / map_res))
-        # self.get_logger().info('Grid Y: %i Grid X: %i' % (grid_y, grid_x))
+        self.get_logger().info('Grid Y: %i Grid X: %i' % (grid_y, grid_x))
 
         # binnum go from 1 to 3 so we can use uint8
         # convert into 2D array using column order
@@ -117,7 +118,7 @@ class Occupy(Node):
         # find how much to shift the image to move grid_x and grid_y to center of image
         shift_x = round(grid_x - i_centerx)
         shift_y = round(grid_y - i_centery)
-        # self.get_logger().info('Shift Y: %i Shift X: %i' % (shift_y, shift_x))
+        self.get_logger().info('Shift Y: %i Shift X: %i' % (shift_y, shift_x))
 
         # pad image to move robot position to the center
         # adapted from https://note.nkmk.me/en/python-pillow-add-margin-expand-canvas/ 
