@@ -16,7 +16,10 @@ import RPI.GPIO as GPIO
 #pins
 DIR = 22 #direction GPIO pin
 STEP = 27 #step GPIO pin
-PWM = 18 #servo pwm pin
+Servo_PWM = 18 #servo pwm pin
+DC_PWM= 12 #top and bottom firing pwm pins
+DCT_2 = 9 #top firing motor pin 2
+DCB_2 = 8 #bottom firing motor pin 2
 
 #constants
 SPR = 200 #steps per revolution, 360/1.8
@@ -28,20 +31,25 @@ CCW = 0 #counter clockwise
 GPIO.setmode(BCM)
 GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
-GPIO.setup(PWM, GPIO.OUT)
+GPIO.setup(Servo_PWM, GPIO.OUT)
+GPIO.setup(DC_PWM, GPIO.OUT)
+GPIO.setup(DCT_2, GPIO.OUT)
+GPIO.setup(DCB_2, GPIO.OUT)
 
-pwm = GPIO.PWM(PWM, 50) #pwm pin at 50hz
-pwm.start(0)
+#max rpi pwm frequency is 8khz
+servo = GPIO.PWM(Servo_PWM, 50) #servo pwm pin at 50hz
+shoot_motors = GPIO.PWM(DC_PWM, 1000) #firing motors pwm pin at 1000 hz
+servo.start(0)
 
-heat_array = [0,0] #x and y coordinate
-def move_x():
-    if heat_array[0] == -1:
+# com_array = [0,0] #x and y coordinate
+def move_x(array):
+    if array[0] == -1:
         GPIO.output(DIR, CCW) # counter clockwise direction
         GPIO.output(STEP, GPIO.HIGH)
         sleep(delay)
         GPIO.output(STEP, GPIO.LOW)
         sleep(delay)
-    elif heat_array[0] == 1:
+    elif array[0] == 1:
         GPIO.output(DIR, CW) #clockwise direction
         GPIO.output(STEP, GPIO.HIGH)
         sleep(delay)
@@ -50,25 +58,31 @@ def move_x():
     else:
         continue #do nothing
 
-def move_y():
+def move_y(array):
     duty = angle / 18 + 2 #duty cycle
 
-    if heat_array[1] == -1:  #decrease angle by 1
+    if array[1] == -1:  #decrease angle by 1
         if angle != 0:
-            angle = angel - 1
-    elif heat_array[1] == 1: #increase angle by 1
+            angle = angle - 1
+    elif array[1] == 1: #increase angle by 1
         if angle != 180:
             angle = angle + 1
     else:
         continue #do nothing
 
-    GPIO.output(PWM, True) #turn on pwm pin
+    GPIO.output(Servo_PWM, True) #turn on pwm pin
 
     if prev_angle != angle: #move servo if there is a change in angle
-        pwm.ChangeDutyCycle(duty)
+        servo.ChangeDutyCycle(duty)
         sleep(1)
 
     prev_angle = angle #check whats the prev angle
+
+def fire(array):
+    if array[2] == 1: #1 for target found
+        GPIO.output(DCT_2, LOW)
+        GPIO.output(DCB_2, LOW)
+    return
 
 
 class Firing_Sys(Node):
@@ -78,12 +92,15 @@ class Firing_Sys(Node):
         self.subscription = self.create_subscription(
             Int8MultiArray, #need to setup topic
             'com_array',
+            self.callback,
             10)
         self.subscription  # prevent unused variable warning
 
-    def callback(self):
-
-
+    def callback(self, com_array):
+        #while true for now, change to while balls have not been shot
+        move_x(com_array.data)
+        move_y(com_array.data)
+        fire(com_array.data)
 
 def main(args=None):
     rclpy.init(args=args)
@@ -92,9 +109,7 @@ def main(args=None):
 
     rclpy.spin(minimal_subscriber)
 
-    while(True): #while true for now, change to while balls have not been shot
-        move_x()
-        move_y()
+
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
