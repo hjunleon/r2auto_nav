@@ -37,9 +37,9 @@ class HeatArray(Node):
 
     def callback(self):
         msg = Float32MultiArray()
-        msg.data = amg
+        msg.data = amg.pixels
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % str(msg.data))
+        self.get_logger().info('Publishing: "%s"' % msg.data)
 
 
 class CommandNode(Node):
@@ -65,7 +65,7 @@ def bright_loc():
         for c in range(len(r)):
             if amg_array[r][c] > highest_temp:
                 highest_temp = amg_array[r][c]
-                coord[0], coord[1] = r, c
+                coord[0], coord[1], coord[2] = r, c, 1
 
     return coord
 
@@ -76,7 +76,7 @@ def command():
     # 0 == stop motion
     # 1 == right, up
     coord = bright_loc()
-    comm = [0, 0, 0]
+    comm = bright_loc()
     if coord[0] == 3 or coord[0] == 4:
         comm[0] = 0
     elif coord[0] < 3:
