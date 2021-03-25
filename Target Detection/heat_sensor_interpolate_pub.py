@@ -29,16 +29,9 @@ amg = adafruit_amg88xx.AMG88XX(i2c)
 # wait for AMG to boot
 time.sleep(0.1)
 
-# pre-allocating variables (for interpolation)
-norm_pix = []
-cal_vec = []
-kk = 0
-cal_size = 10  # size of calibration
-cal_pix = []
-time_prev = time.time()  # time for analyzing time between plot updates
-
 # temperature threshold
 temp_thres = 30
+radius_thres = 5
 
 
 class HeatArray(Node):
@@ -75,11 +68,13 @@ def bright_loc():
     amg_array = np.array(amg.pixels)
     resized_array = cv2.resize(amg_array, (64, 64), interpolation=cv2.INTER_LANCZOS4)
     coord = [0, 0, 0]  # x, y, on or off
-    for r in range(amg_array.shape[0]):
-        for c in range(amg_array.shape[1]):
-            if amg_array[r, c] > highest_temp:
+    highest_temp = temp_thres
+    for r in range(resized_array.shape[0]):
+        for c in range(resized_array.shape[1]):
+            if amg_array[r, c] > temp_thres:
                 highest_temp = amg_array[r, c]
-                coord[0], coord[1], coord[2] = r, c, 1
+                if abs(coord[0] - r) > radius_thres and abs(coord[1] - c) >= radius_thres:
+                    coord[0], coord[1], coord[2] = r, c, 1
     return coord
 
 
