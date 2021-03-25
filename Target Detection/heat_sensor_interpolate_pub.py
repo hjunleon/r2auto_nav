@@ -1,7 +1,7 @@
 # !usr/bin/python
 
 """
-Created on Wed Mar 24, 2021
+Created on Wed Mar 25, 2021
 Sensor: Newwing AMG8833 IR 8x8 Thermal Imager Array
 Author: @coldyoungguy
 
@@ -20,11 +20,25 @@ import time
 import busio
 import board
 import adafruit_amg88xx
+import numpy as np
+import cv2
+
 i2c = busio.I2C(board.SCL, board.SDA)
 amg = adafruit_amg88xx.AMG88XX(i2c)
 
 # wait for AMG to boot
 time.sleep(0.1)
+
+# pre-allocating variables (for interpolation)
+norm_pix = []
+cal_vec = []
+kk = 0
+cal_size = 10  # size of calibration
+cal_pix = []
+time_prev = time.time()  # time for analyzing time between plot updates
+
+# temperature threshold
+temp_thres = 30
 
 
 class HeatArray(Node):
@@ -58,20 +72,18 @@ class CommandNode(Node):
 
 
 def bright_loc():
-    amg_array = amg.pixels
-    highest_temp = 30  # threshold
+    amg_array = np.array(amg.pixels)
+    resized_array = cv2.resize(amg_array, (64, 64), interpolation=cv2.INTER_LANCZOS4)
     coord = [0, 0, 0]  # x, y, on or off
-    for r in range(len(amg_array)):
-        for c in range(len(r)):
-            if amg_array[r][c] > highest_temp:
-                highest_temp = amg_array[r][c]
+    for r in range(amg_array.shape[0]):
+        for c in range(amg_array.shape[1]):
+            if amg_array[r, c] > highest_temp:
+                highest_temp = amg_array[r, c]
                 coord[0], coord[1], coord[2] = r, c, 1
-
     return coord
 
 
 def command():
-
     # -1 == left, down
     # 0 == stop motion
     # 1 == right, up
@@ -95,17 +107,24 @@ def command():
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    heat_array = HeatArray()
-    comm_node = CommandNode
-    rclpy.spin(heat_array)
-    rclpy.spin(comm_node)
+    try:
+        rclpy.init(args=args)
+        heat_array = HeatArray()
+        comm_node = CommandNode
+        rclpy.spin(heat_array)
+        rclpy.spin(comm_node)
 
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    heat_array.destroy_node()
-    rclpy.shutdown()
+        # Destroy the node explicitly
+        # (optional - otherwise it will be done automatically
+        # when the garbage collector destroys the node object)
+        heat_array.destroy_node()
+        rclpy.shutdown()
+
+    except KeyboardInterrupt:
+        print("CTRL-C: Program Stopping via Keyboard Interrupt...")
+
+    finally:
+        print("Exiting Loop")
 
 
 if __name__ == '__main__':
