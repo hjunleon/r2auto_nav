@@ -119,6 +119,8 @@ def main(args=None):
 
     except KeyboardInterrupt:
         print("CTRL-C: Program Stopping via Keyboard Interrupt...")
+        heat_array.destroy_node()
+        rclpy.shutdown()
 
     finally:
         print("Exiting Loop")
