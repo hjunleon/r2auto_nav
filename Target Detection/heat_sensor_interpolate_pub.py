@@ -44,7 +44,9 @@ class HeatArray(Node):
 
     def callback(self):
         msg = Float32MultiArray()
-        msg.data = amg.pixels
+        amg_array = np.array(amg.pixels)
+        resized_array = cv2.resize(amg_array, (64, 64), interpolation=cv2.INTER_LANCZOS4)
+        msg.data = resized_array
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % msg.data)
 
@@ -80,7 +82,7 @@ def bright_loc():
 
 def command():
     # -1 == left, down
-    # 0 == stop motion
+    # 0 == stop
     # 1 == right, up
     coord = bright_loc()
     comm = bright_loc()
