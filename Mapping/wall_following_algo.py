@@ -1,6 +1,7 @@
 # Author: Addison Sears-Collins
 # Date: December 17, 2020
 # ROS Version: ROS 2 Foxy Fitzroy
+# https://automaticaddison.com/the-bug2-algorithm-for-robot-motion-planning/
 
 ############## IMPORT LIBRARIES #################
 # Python math library
