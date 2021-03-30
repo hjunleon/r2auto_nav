@@ -22,7 +22,7 @@ from PIL import Image
 import scipy.stats
 
 # constants
-occ_bins = [-1, 0, 50, 100]
+occ_bins = [-1, 0, 50,100]
 
 
 class Occupy(Node):
@@ -45,7 +45,8 @@ class Occupy(Node):
         # and values between 50 and 100. The binned_statistic function will also
         # return the bin numbers so we can use that easily to create the image 
         occ_counts, edges, binnum = scipy.stats.binned_statistic(occdata, np.nan, statistic='count', bins=occ_bins)
-        print(edges)
+        print(scipy.stats.binned_statistic(occdata, np.nan, statistic='count', bins=occ_bins))
+       #print(binnum)
         # get width and height of map
         iwidth = msg.info.width
         iheight = msg.info.height
@@ -53,11 +54,22 @@ class Occupy(Node):
         total_bins = iwidth * iheight
         # log the info
         self.get_logger().info('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i' % (occ_counts[0], occ_counts[1], occ_counts[2], total_bins))
-
+        print(msg.info.height,msg.info.width)
         # binnum go from 1 to 3 so we can use uint8
         # convert into 2D array using column order
         odata = np.uint8(binnum.reshape(msg.info.height,msg.info.width))
+        for y in odata:
+            print(y)
+            print(len(y))
+            #for x in y:
+                #print(x)
         # create image from 2D array using PIL
+        """
+        for idx,y in enumerate(odata):
+            for idx2,x in enumerate(y):
+                if (x == 1):
+                    odata[idx][idx2] = 2
+        """        
         img = Image.fromarray(odata)
         # show the image using grayscale map
         plt.imshow(img, cmap='gray', origin='lower')

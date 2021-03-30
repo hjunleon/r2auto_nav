@@ -20,7 +20,7 @@ from example_interfaces.msg import Int64
 # variables
 radius = 41  # radius of circle
 bg_threshold = 127  # 0 to 255
-
+xy_command = [0, 0]
 
 class CVCommandsNode(Node):
     def __int__(self):
@@ -28,11 +28,12 @@ class CVCommandsNode(Node):
         self.cv_commands_publisher_ = self.create_publisher(Int64, 'cv_commands', 30)
 
     def publish_cv_commands(self):
-        command = 0
+        command = xy_command
         msg = Int64
         msg.data = command
         self.cv_commands_publisher_.publish(msg)
         self.cv_command_timer_ = self.create_timer(0.1, self.publish_cv_commands)
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -41,7 +42,28 @@ def main(args=None):
     rclpy.shutdown()
 
 
+def move_direction():
+    # determine window size and middle position of window
+    # [x, y] offset, negative is left and down
+    mid_x, mid_y = 1920 // 2, 1080 // 2
+
+    if mid_x - maxLoc[0] > radius:
+        xy_command[0] = -1
+    elif maxLoc[0] - mid_x > radius:
+        xy_command[0] = 1
+    else:
+        xy_command[0] = 0
+
+    if mid_y - maxLoc[1] > radius:
+        xy_command[1] = -1
+    elif maxLoc[1] - mid_y > radius:
+        xy_command[1] = 1
+    else:
+        xy_command[1] = 0
+
+
 if __name__ == '__main__':
+    main()
     # Open the video device.
     video = v4l2capture.Video_device("/dev/video0")
 
@@ -79,6 +101,7 @@ if __name__ == '__main__':
         # region
         thresh1 = cv2.GaussianBlur(thresh1, (radius, radius), 0)
         (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(frames)
+        move_direction()
         frames = orig.copy()
         cv2.circle(frames, maxLoc, radius, (255, 0, 0), 2)
 

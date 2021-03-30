@@ -100,6 +100,7 @@ class AutoNav(Node):
 
     def odom_callback(self, msg):
         # self.get_logger().info('In odom_callback')
+        print(msg)
         orientation_quat =  msg.pose.pose.orientation
         self.roll, self.pitch, self.yaw = euler_from_quaternion(orientation_quat.x, orientation_quat.y, orientation_quat.z, orientation_quat.w)
 
@@ -107,15 +108,15 @@ class AutoNav(Node):
     def occ_callback(self, msg):
         # self.get_logger().info('In occ_callback')
         # create numpy array
-        print("msg")
-        print(msg)
-        print(len(msg.data))
+        #print("msg")
+        #print(msg)
+      #  print(len(msg.data))
         msgdata = np.array(msg.data)
         #[print(x) for x in msgdata]
         # compute histogram to identify percent of bins with -1
         occ_counts = np.histogram(msgdata,occ_bins)
         # calculate total number of bins
-        print(occ_counts)
+    #    print(occ_counts)
         total_bins = msg.info.width * msg.info.height
         # log the info
         self.get_logger().info('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i' % (occ_counts[0][0], occ_counts[0][1], occ_counts[0][2], total_bins))
@@ -126,6 +127,7 @@ class AutoNav(Node):
         #self.occdata = np.uint8(oc2.reshape(msg.info.height,msg.info.width,order='F'))
         self.occdata = np.uint8(oc2.reshape(msg.info.height,msg.info.width))
         # print to file
+        
         np.savetxt("occupancy_msg_data.txt", msg.data)
         np.savetxt(mapfile, self.occdata)
 
@@ -234,7 +236,7 @@ class AutoNav(Node):
 
             # find direction with the largest distance from the Lidar,
             # rotate to that direction, and start moving
-            self.pick_direction()
+            #self.pick_direction()
 
             while rclpy.ok():
                 if self.laser_range.size != 0:
@@ -244,6 +246,7 @@ class AutoNav(Node):
                     # self.get_logger().info('Distances: %s' % str(lri))
 
                     # if the list is not empty
+                    """
                     if(len(lri[0])>0):
                         # stop moving
                         self.stopbot()
@@ -251,7 +254,7 @@ class AutoNav(Node):
                         # rotate to that direction
                         # start moving
                         self.pick_direction()
-                    
+                    """
                 # allow the callback functions to run
                 rclpy.spin_once(self)
 
