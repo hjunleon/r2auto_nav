@@ -46,36 +46,15 @@ class HeatArray(Node):
         self.get_logger().info('Publishing...')
 
 
-class CommandNode(Node):
-
-    def __init__(self):
-        super().__init__('com_array')
-        self.publisher_ = self.create_publisher(Int8MultiArray, 'com_array', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.callback)
-
-    def callback(self):
-        msg = Int8MultiArray()
-        msg.data = command()
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-
-
 def main(args=None):
 
     rclpy.init(args=args)
     heat_array = HeatArray()
     rclpy.spin(heat_array)
 
-
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    heat_array.destroy_node()
-    rclpy.shutdown()
-
-
-
     heat_array.destroy_node()
     rclpy.shutdown()
 

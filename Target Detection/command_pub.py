@@ -3,12 +3,14 @@
 # ROS imports
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray, Float32MultiArray
+from std_msgs.msg import Int8MultiArray, Float64MultiArray
+import numpy as np
 
 # temperature threshold
 temp_thres = 30
 radius_thres = 5
 command_list = [0, 0, 0]
+resolution = 64
 
 
 class CommandNode(Node):
@@ -30,50 +32,60 @@ class HeatArraySub(Node):
 
     def __init__(self):
         super().__init__('heat_array_sub')
-        self.subscription = self.create_subscription(Float32MultiArray, 'heat_array', self.callback, 10)
+        self.subscription = self.create_subscription(Float64MultiArray, 'heat_array', self.callback, 10)
         self.subscription  # prevent unused variable warning
-        self.coordinates = [0, 0, 0]
 
     def callback(self, heat_array):
-        self.coordinates = get_bright_loc(heat_array.data)
-        self.get_logger().info('Position "%s"' % self.coordinates)
-        command(self.coordinates)
+        coordinates = get_bright_loc(heat_array.data)
+        self.get_logger().info('Coordinates: "%s"' % coordinates)
+        command(coordinates)
+
+
+# def get_bright_loc(array):
+#     coord = [0, 0, 0]  # x, y, on or off
+#     highest_temp = temp_thres
+#     for r in range(array.shape[0]):
+#         for c in range(array.shape[1]):
+#             if array[r, c] > highest_temp:
+#                 highest_temp = array[r, c]
+#                 if abs(coord[0] - r) > radius_thres and abs(coord[1] - c) >= radius_thres:
+#                     coord[0], coord[1], coord[2] = r, c, 1
+#     return coord
 
 
 def get_bright_loc(array):
+    heat_img = np.reshape(array, (resolution, resolution))
     coord = [0, 0, 0]  # x, y, on or off
-    highest_temp = temp_thres
-    for r in range(array.shape[0]):
-        for c in range(array.shape[1]):
-            if array[r, c] > highest_temp:
-                highest_temp = array[r, c]
-                if abs(coord[0] - r) > radius_thres and abs(coord[1] - c) >= radius_thres:
-                    coord[0], coord[1], coord[2] = r, c, 1
+    i, j = np.unravel_index(heat_img.argmax(), heat_img.shape)
+    if heat_img[i, j] > temp_thres:
+        coord = [i, j, 1]
     return coord
 
 
-def command(coordinates):
+def command(coord):
     # -1 == left, down
     # 0 == stop
     # 1 == right, up
 
-    coord = coordinates
     global command_list
     command_list = coord[::]
+    xdiff, ydiff = abs(coord[0] - resolution), abs(coord[1] - resolution)
 
-    if coord[0] == 3 or coord[0] == 4:
+    if xdiff >= radius_thres:
+        if coord[0] < resolution // 2:
+            command_list[0] = -1
+        elif coord[0] > resolution // 2:
+            command_list[0] = 1
+    else:
         command_list[0] = 0
-    elif coord[0] < 3:
-        command_list[0] = -1
-    else:
-        command_list[0] = 1
 
-    if coord[1] == 3 or coord[1] == 4:
-        command_list[1] = 0
-    elif coord[1] < 3:
-        command_list[1] = -1
+    if ydiff >= radius_thres:
+        if coord[1] < resolution // 2:
+            command_list[1] = -1
+        elif coord[1] > resolution // 2:
+            command_list[1] = 1
     else:
-        command_list[1] = 1
+        command_list[1] = 0
 
 
 def main(args=None):
