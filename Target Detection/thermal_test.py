@@ -18,6 +18,7 @@ import time
 import busio
 import board
 import adafruit_amg88xx
+import numpy as np
 i2c = busio.I2C(board.SCL, board.SDA)
 amg = adafruit_amg88xx.AMG88XX(i2c)
 
@@ -35,9 +36,10 @@ class HeatArray(Node):
 
     def callback(self):
         msg = Float32MultiArray()
-        msg.data = amg.pixels
+        msg.data = np.reshape(np.asarray(amg.pixels), 64)
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.get_logger().info('Publishing...')
+
 
 def main(args=None):
     rclpy.init(args=args)

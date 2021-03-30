@@ -17,6 +17,7 @@ from std_msgs.msg import Float32MultiArray
 # Plotting imports
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np
 
 mpl.use('tkagg')  # to enable real-time plotting in Raspberry Pi
 
@@ -30,7 +31,8 @@ class Plotter(Node):
         self.subscription = self.create_subscription(Float32MultiArray, 'heat_array', self.listener_callback, 10)
         self.subscription  # prevent unused variable warning
 
-    def listener_callback(self, heat_array):
+    def listener_callback(self, array):
+        heat_array = np.reshape(array, (8, 8))
         plt.imshow(heat_array, cmap='magma')  # viridis, plasma, inferno, magma, cividis
         plt.colorbar()
         # plt.clim(1, 8)
