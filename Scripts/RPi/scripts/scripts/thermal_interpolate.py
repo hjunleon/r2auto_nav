@@ -28,7 +28,7 @@ amg = adafruit_amg88xx.AMG88XX(i2c)
 time.sleep(0.1)
 
 # variables
-
+resolution = 64
 
 class HeatArray(Node):
 
