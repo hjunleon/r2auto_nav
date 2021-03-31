@@ -15,7 +15,7 @@ from std_msgs.msg import Int8MultiArray, Float64MultiArray
 import numpy as np
 
 # temperature threshold
-temp_thres = 30
+temp_thres = 20
 radius_thres = 5
 resolution = 64
 

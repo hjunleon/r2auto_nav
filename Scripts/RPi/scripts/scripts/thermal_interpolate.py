@@ -30,6 +30,7 @@ time.sleep(0.1)
 # variables
 resolution = 64
 
+
 class HeatArray(Node):
 
     def __init__(self):
