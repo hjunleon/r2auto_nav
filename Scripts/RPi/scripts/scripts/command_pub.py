@@ -16,7 +16,7 @@ import numpy as np
 
 # temperature threshold
 temp_thres = 30
-radius_thres = 7
+radius_thres = 5
 resolution = 64
 
 
