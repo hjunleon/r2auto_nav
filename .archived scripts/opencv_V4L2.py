@@ -44,7 +44,7 @@ def main(args=None):
 
 def move_direction():
     # determine window size and middle position of window
-    # [x, y] offset, negative is left and down
+    # [scripts, y] offset, negative is left and down
     mid_x, mid_y = 1920 // 2, 1080 // 2
 
     if mid_x - maxLoc[0] > radius:

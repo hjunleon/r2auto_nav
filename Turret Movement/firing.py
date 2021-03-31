@@ -49,7 +49,7 @@ shoot_motors = GPIO.PWM(DC_PWM, 1000) #firing motors pwm pin at 1000 hz
 servo.start(0)
 shoot_motors.start(0)
 
-# com_array = [0,0] #x and y coordinate
+# com_array = [0,0] #scripts and y coordinate
 def move_x(array):
     if array[0] == -1:
         GPIO.output(DIR, CCW) # counter clockwise direction

@@ -38,7 +38,7 @@ mapfile = 'map.txt'
 def euler_from_quaternion(x, y, z, w):
     """
     Convert a quaternion into euler angles (roll, pitch, yaw)
-    roll is rotation around x in radians (counterclockwise)
+    roll is rotation around scripts in radians (counterclockwise)
     pitch is rotation around y in radians (counterclockwise)
     yaw is rotation around z in radians (counterclockwise)
     """
@@ -112,7 +112,7 @@ class AutoNav(Node):
         #print(msg)
       #  print(len(msg.data))
         msgdata = np.array(msg.data)
-        #[print(x) for x in msgdata]
+        #[print(scripts) for scripts in msgdata]
         # compute histogram to identify percent of bins with -1
         occ_counts = np.histogram(msgdata,occ_bins)
         # calculate total number of bins

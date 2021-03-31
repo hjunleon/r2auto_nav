@@ -31,7 +31,7 @@ speedchange = 0.05
 def euler_from_quaternion(x, y, z, w):
     """
     Convert a quaternion into euler angles (roll, pitch, yaw)
-    roll is rotation around x in radians (counterclockwise)
+    roll is rotation around scripts in radians (counterclockwise)
     pitch is rotation around y in radians (counterclockwise)
     yaw is rotation around z in radians (counterclockwise)
     """
@@ -147,7 +147,7 @@ class Mover(Node):
         try:
             while True:
                 # get keyboard input
-                cmd_char = str(input("Keys w/x/a/d -/+int s: "))
+                cmd_char = str(input("Keys w/scripts/a/d -/+int s: "))
         
                 # use our own function isnumber as isnumeric 
                 # does not handle negative numbers
@@ -164,7 +164,7 @@ class Mover(Node):
                         # move forward
                         twist.linear.x += speedchange
                         twist.angular.z = 0.0
-                    elif cmd_char == 'x':
+                    elif cmd_char == 'scripts':
                         # move backward
                         twist.linear.x -= speedchange
                         twist.angular.z = 0.0

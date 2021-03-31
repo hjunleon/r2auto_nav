@@ -34,7 +34,7 @@ class Mover(Node):
         try:
             while True:
                 # get keyboard input
-                cmd_char = str(input("Keys w/x a/d s: "))
+                cmd_char = str(input("Keys w/scripts a/d s: "))
         
                 # check which key was entered
                 if cmd_char == 's':
@@ -45,7 +45,7 @@ class Mover(Node):
                     # move forward
                     twist.linear.x += speedchange
                     twist.angular.z = 0.0
-                elif cmd_char == 'x':
+                elif cmd_char == 'scripts':
                     # move backward
                     twist.linear.x -= speedchange
                     twist.angular.z = 0.0

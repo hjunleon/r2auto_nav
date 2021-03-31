@@ -31,7 +31,7 @@ class CommandNode(Node):
 
 
 # def get_bright_loc(array):
-#     coord = [0, 0, 0]  # x, y, on or off
+#     coord = [0, 0, 0]  # scripts, y, on or off
 #     highest_temp = temp_thres
 #     for r in range(array.shape[0]):
 #         for c in range(array.shape[1]):
@@ -44,7 +44,7 @@ class CommandNode(Node):
 
 def get_bright_loc(array):
     heat_img = np.reshape(array, (resolution, resolution))
-    coord = [resolution // 2, resolution // 2, 0]  # x, y, on or off
+    coord = [resolution // 2, resolution // 2, 0]  # scripts, y, on or off
     i, j = np.unravel_index(heat_img.argmax(), heat_img.shape)
     if heat_img[i, j] > temp_thres:
         coord = [i, j, 1]

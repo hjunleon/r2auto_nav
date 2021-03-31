@@ -32,7 +32,7 @@ map_bg_color = 1
 def euler_from_quaternion(x, y, z, w):
     """
     Convert a quaternion into euler angles (roll, pitch, yaw)
-    roll is rotation around x in radians (counterclockwise)
+    roll is rotation around scripts in radians (counterclockwise)
     pitch is rotation around y in radians (counterclockwise)
     yaw is rotation around z in radians (counterclockwise)
     """
@@ -98,9 +98,9 @@ class Occupy(Node):
 
         # get map resolution
         map_res = msg.info.resolution
-        # get map origin struct has fields of x, y, and z
+        # get map origin struct has fields of scripts, y, and z
         map_origin = msg.info.origin.position
-        # get map grid positions for x, y position
+        # get map grid positions for scripts, y position
         grid_x = round((cur_pos.x - map_origin.x) / map_res)
         grid_y = round(((cur_pos.y - map_origin.y) / map_res))
         self.get_logger().info('Grid Y: %i Grid X: %i' % (grid_y, grid_x))

@@ -56,7 +56,7 @@ class PlaceholderController(Node):
         # This node subscribes to messages of type Float64MultiArray
         # over a topic named: /en613/state_est
         # The message represents the current estimated state:
-        #   [x, y, yaw]
+        #   [scripts, y, yaw]
         # The callback function is called as soon as a message
         # is received.
         # The maximum number of queued messages is 10.
@@ -123,7 +123,7 @@ class PlaceholderController(Node):
         # By changing the value of self.robot_mode, you can alter what
         # the robot will do when the program is launched.
         #   "obstacle avoidance mode": Robot will avoid obstacles
-        #   "go to goal mode": Robot will head to an x,y coordinate
+        #   "go to goal mode": Robot will head to an scripts,y coordinate
         #   "wall following mode": Robot will follow a wall
         self.robot_mode = "go to goal mode"
 
@@ -137,13 +137,13 @@ class PlaceholderController(Node):
 
         ############# GO TO GOAL MODE PARAMETERS ######################
         # Finite states for the go to goal mode
-        #   "adjust heading": Orient towards a goal x, y coordinate
-        #   "go straight": Go straight towards goal x, y coordinate
-        #   "goal achieved": Reached goal x, y coordinate
+        #   "adjust heading": Orient towards a goal scripts, y coordinate
+        #   "go straight": Go straight towards goal scripts, y coordinate
+        #   "goal achieved": Reached goal scripts, y coordinate
         self.go_to_goal_state = "adjust heading"
 
         # List the goal destinations
-        # We create a list of the (x,y) coordinate goals
+        # We create a list of the (scripts,y) coordinate goals
         self.goal_x_coordinates = False  # [ 0.0, 3.0, 0.0, -1.5, -1.5,  4.5, 0.0]
         self.goal_y_coordinates = False  # [-4.0, 1.0, 1.5,  1.0, -3.0, -4.0, 0.0]
 
@@ -160,7 +160,7 @@ class PlaceholderController(Node):
         # adjustment (rad/s)
         self.turning_speed_yaw_adjustment = 0.0625
 
-        # Need to get within +/- 0.2 meter (20 cm) of (x,y) goal
+        # Need to get within +/- 0.2 meter (20 cm) of (scripts,y) goal
         self.dist_precision = 0.2
 
         ############# WALL FOLLOWING MODE PARAMETERS ##################
@@ -208,7 +208,7 @@ class PlaceholderController(Node):
         # in order to go from wall following mode to go to goal mode
         self.distance_to_start_goal_line_precision = 0.1
 
-        # Used to record the (x,y) coordinate where the robot hit
+        # Used to record the (scripts,y) coordinate where the robot hit
         # a wall.
         self.hit_point_x = 0
         self.hit_point_y = 0
@@ -216,7 +216,7 @@ class PlaceholderController(Node):
         # Distance between the hit point and the goal in meters
         self.distance_to_goal_from_hit_point = 0.0
 
-        # Used to record the (x,y) coordinate where the robot left
+        # Used to record the (scripts,y) coordinate where the robot left
         # a wall.
         self.leave_point_x = 0
         self.leave_point_y = 0

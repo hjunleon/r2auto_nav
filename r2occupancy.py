@@ -61,13 +61,13 @@ class Occupy(Node):
         for y in odata:
             print(y)
             print(len(y))
-            #for x in y:
-                #print(x)
+            #for scripts in y:
+                #print(scripts)
         # create image from 2D array using PIL
         """
         for idx,y in enumerate(odata):
-            for idx2,x in enumerate(y):
-                if (x == 1):
+            for idx2,scripts in enumerate(y):
+                if (scripts == 1):
                     odata[idx][idx2] = 2
         """        
         img = Image.fromarray(odata)

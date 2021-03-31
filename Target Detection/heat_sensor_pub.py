@@ -60,7 +60,7 @@ class CommandNode(Node):
 def bright_loc():
     amg_array = amg.pixels
     highest_temp = 30  # threshold
-    coord = [0, 0, 0]  # x, y, on or off
+    coord = [0, 0, 0]  # scripts, y, on or off
     for r in range(len(amg_array)):
         for c in range(len(r)):
             if amg_array[r][c] > highest_temp:

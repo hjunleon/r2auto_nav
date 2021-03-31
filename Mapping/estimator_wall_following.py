@@ -61,7 +61,7 @@ class PlaceholderEstimator(Node):
             10)
 
         # Create a publisher
-        # This node publishes the estimated position (x, y, yaw)
+        # This node publishes the estimated position (scripts, y, yaw)
         # The type of message is std_msgs/Float64MultiArray
         self.publisher_state_est = self.create_publisher(
             Float64MultiArray,
@@ -78,8 +78,8 @@ class PlaceholderEstimator(Node):
         self.est_yaw = 0.0
 
         # A matrix
-        # 3x3 matrix -> number of states x number of states matrix
-        # Expresses how the state of the system [x,y,yaw] changes
+        # 3x3 matrix -> number of states scripts number of states matrix
+        # Expresses how the state of the system [scripts,y,yaw] changes
         # from t-1 to t when no control command is executed. Typically
         # a robot on wheels only drives when the wheels are commanded
         # to turn.
@@ -115,7 +115,7 @@ class PlaceholderEstimator(Node):
         # into predicted sensor measurements at time t=1.
         # In this case, H will be the identity matrix since the
         # estimated state maps directly to state measurements from the
-        # odometry data [x, y, yaw]
+        # odometry data [scripts, y, yaw]
         # H has the same number of rows as sensor measurements
         # and same number of columns as states.
         self.H_t = np.array([[1.0, 0, 0],
@@ -157,7 +157,7 @@ class PlaceholderEstimator(Node):
     def velocity_callback(self, msg):
         """
         Listen to the velocity commands (linear forward velocity
-        in the x direction in the robot's reference frame and
+        in the scripts direction in the robot's reference frame and
         angular velocity (yaw rate) around the robot's z-axis.
         Convert those velocity commands into a 3-element control
         input vector ...
@@ -179,8 +179,8 @@ class PlaceholderEstimator(Node):
         """
         Receive the odometry information containing the position and orientation
         of the robot in the global reference frame.
-        The position is x, y, z.
-        The orientation is a x,y,z,w quaternion.
+        The position is scripts, y, z.
+        The orientation is a scripts,y,z,w quaternion.
         """
         roll, pitch, yaw = self.euler_from_quaternion(
             msg.pose.pose.orientation.x,
@@ -207,8 +207,8 @@ class PlaceholderEstimator(Node):
         """
         Publish the estimated pose (position and orientation) of the
         robot to the '/en613/state_est' topic.
-        :param: state_vector_x_y_yaw [x, y, yaw]
-            x is in meters, y is in meters, yaw is in radians
+        :param: state_vector_x_y_yaw [scripts, y, yaw]
+            scripts is in meters, y is in meters, yaw is in radians
         """
         msg = Float64MultiArray()
         msg.data = state_vector_x_y_yaw
@@ -217,7 +217,7 @@ class PlaceholderEstimator(Node):
     def euler_from_quaternion(self, x, y, z, w):
         """
         Convert a quaternion into euler angles (roll, pitch, yaw)
-        roll is rotation around x in radians (counterclockwise)
+        roll is rotation around scripts in radians (counterclockwise)
         pitch is rotation around y in radians (counterclockwise)
         yaw is rotation around z in radians (counterclockwise)
         """
@@ -240,12 +240,12 @@ class PlaceholderEstimator(Node):
         """
         Calculates and returns the B matrix
 
-        3x3 matix -> number of states x number of control inputs
+        3x3 matix -> number of states scripts number of control inputs
         The control inputs are the forward speed and the rotation
-        rate around the z axis from the x-axis in the
+        rate around the z axis from the scripts-axis in the
         counterclockwise direction.
         [v,v,yaw_rate]
-        Expresses how the state of the system [x,y,yaw] changes
+        Expresses how the state of the system [scripts,y,yaw] changes
         from t-1 to t
         due to the control commands (i.e. inputs).
         :param yaw: The yaw (rotation angle around the z axis) in rad
@@ -263,12 +263,12 @@ class PlaceholderEstimator(Node):
 
         INPUT
         :param z_t_observation_vector The observation from the Odometry
-            3x1 NumPy Array [x,y,yaw] in the global reference frame
+            3x1 NumPy Array [scripts,y,yaw] in the global reference frame
             in [meters,meters,radians].
 
         OUTPUT
         :return state_estimate_t optimal state estimate at time t
-            [x,y,yaw]....3x1 list --->
+            [scripts,y,yaw]....3x1 list --->
             [meters,meters,radians]
 
         """
