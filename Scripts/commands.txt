@@ -1,0 +1,2 @@
+svn export https://github.com/hjunleon/r2auto_nav.git/trunk/Scripts/RPi/scripts
+svn export https://github.com/hjunleon/r2auto_nav.git/trunk/Scripts/Workstation/scripts
