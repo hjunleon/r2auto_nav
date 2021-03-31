@@ -97,7 +97,7 @@ def command():
 def main(args=None):
     rclpy.init(args=args)
     heat_array = HeatArray()
-    comm_node = CommandNode
+    comm_node = CommandNode()
     rclpy.spin(heat_array)
     rclpy.spin(comm_node)
 
@@ -105,6 +105,7 @@ def main(args=None):
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
     heat_array.destroy_node()
+    comm_node.destroy_node()
     rclpy.shutdown()
 
 
