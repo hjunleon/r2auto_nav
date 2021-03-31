@@ -1,12 +1,10 @@
 # !usr/bin/python
 
 """
-Created on Wed Mar 25, 2021
+Created on Wed Mar 31, 2021
 Author: @coldyoungguy
 
-References:
-https://makersportal.com/blog/2018/1/25/heat-mapping-with-a-64-pixel-infrared-sensor-and-raspberry-pi
-http://docs.ros.org/en/rolling/Tutorials/Writing-A-Simple-Py-Publisher-And-Subscriber.html
+Copy from r2auto_nav/Target Detection/plotting_sub.py in git
 """
 
 # ROS imports

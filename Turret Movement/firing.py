@@ -139,7 +139,7 @@ class Firing_Sys(Node):
         super().__init__('firing_mechanism')
         self.subscription = self.create_subscription(
             Int8MultiArray, #need to setup topic
-            'com_array',
+            'com_node',
             self.callback,
             10)
         self.subscription  # prevent unused variable warning

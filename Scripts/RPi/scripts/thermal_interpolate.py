@@ -1,13 +1,11 @@
 # !usr/bin/python
 
 """
-Created on Wed Mar 25, 2021
+Created on Wed Mar 31, 2021
 Sensor: Newwing AMG8833 IR 8x8 Thermal Imager Array
 Author: @coldyoungguy
 
-References:
-https://makersportal.com/blog/2018/1/25/heat-mapping-with-a-64-pixel-infrared-sensor-and-raspberry-pi
-http://docs.ros.org/en/rolling/Tutorials/Writing-A-Simple-Py-Publisher-And-Subscriber.html
+Copy from r2auto_nav/Target Detection/heat_sensor_interpolate_pub.py in git
 """
 
 ### ROS imports
