@@ -54,13 +54,14 @@ GPIO.setup(DCB_2, GPIO.OUT)
 tilt = GPIO.PWM(Tilt_PWM, 50) #servo pwm pin at 50hz
 loading = GPIO.PWM(Loading_PWM, 50) #firing motors pwm pin at 1000 hz
 tilt.start(7.9)
-loading.start()
+loading.start(8.75)
 
 # com_array = [0,0] #scripts and y coordinate
 def move_x(array):
     if yaw < 200:
         if array[0] == -1:
             GPIO.output(DIR, CW) # counter clockwise direction
+            print("Pan left")
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
             GPIO.output(STEP, GPIO.LOW)
@@ -68,6 +69,7 @@ def move_x(array):
             yaw -= 1
         elif array[0] == 1:
             GPIO.output(DIR, CCW) #clockwise direction
+            print("Pan right")
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
             GPIO.output(STEP, GPIO.LOW)
@@ -76,6 +78,7 @@ def move_x(array):
         else:
             continue #do nothing
     else:
+        print("Exceeded pan range, returning to origin")
         if yaw < 0:
             GPIO.output(DIR, CCW)
         elif yaw > 0:
@@ -88,6 +91,7 @@ def move_x(array):
 
     #when shooting is complete, move everything back to origin
     if complete == 1:
+        print("Shooting complete, pan returning to origin")
         if yaw < 0:
             GPIO.output(DIR, CCW)
         elif yaw > 0:
@@ -104,9 +108,11 @@ def move_y(array):
 
     if array[1] == -1:  #decrease angle by 1
         if angle > 97:
+            print("Tilt down")
             angle -= 1
     elif array[1] == 1: #increase angle by 1
         if angle < 113:
+            print("Tilt up")
             angle += 1
     else:
         continue #do nothing
@@ -121,11 +127,11 @@ def move_y(array):
 
     #if complete, move back to origin
     if complete == 1:
+        print("Firing complete, tilt return to origin")
         servo.ChangeDutyCycle(7.9)
 
 #power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
-    speed = 100 #0 - 100
     if array[2] == 1 and complete == 0: #1 for target found
         GPIO.output(DCT_1, HIGH)
         GPIO.output(DCB_1, HIGH)
@@ -133,27 +139,32 @@ def fire(array):
         GPIO.output(DCB_2, LOW)
 
     if complete == 1:
+        print("Firing complete, motors whining down")
         GPIO.output(DCT_1, LOW)
         GPIO.output(DCB_1, LOW)
         GPIO.output(DCT_2, LOW)
         GPIO.output(DCB_2, LOW)
 
+#if 40 seconds have passed, complete  = 1
 def timer(array):
     if array[2] == 1 and complete == 0:
         start_time = time.time()
         while (time.time() - start_time) < timer_time:
-            continue
+            return
         complete = 1
-        #insert timer code, 40 seconds
-        #if 40 seconds have passed, complete  = 1
-
     return complete
 
 #loading of balls using servo motor
 def load(com_array):
     #needs to be stopping at ball at neutral(?)<---confirm this with rest
     #servo arm goes back and moves forward in a certain timing range to push balls forward
-    
+    if array[0] == 0 and array[1] == 0:
+        for i in range(3):
+            print("Loading ball")
+            loading.ChangeDutyCycle(2.92)
+            sleep(1)
+            loading.ChangeDutyCycle(7.9)
+            sleep(1)
     return
 
 
