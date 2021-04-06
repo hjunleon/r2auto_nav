@@ -12,16 +12,19 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int8MultiArray
+import time
 
 # from std_msgs.msg import String
 from time import sleep
 import RPI.GPIO as GPIO
 
-#pins
+#pins based on BCM
 DIR = 22 #direction GPIO pin
 STEP = 27 #step GPIO pin
-Servo_PWM = 18 #servo pwm pin
-DC_PWM= 12 #top and bottom firing pwm pins
+Tilt_PWM = 18 #servo pwm pin
+Loading_PWM= 12 #Loading servo pwm pibn
+DCT_1 = 10 #top firing motor pin 2
+DCB_1 = 11 #bottom firing motor pin 2
 DCT_2 = 9 #top firing motor pin 2
 DCB_2 = 8 #bottom firing motor pin 2
 
@@ -32,48 +35,63 @@ CW = 1 #clockwise
 CCW = 0 #counter clockwise
 complete = 0 #turns to 1 when firing is complete, controlled by a timer
 yaw = 0 #keep track of relative position of top layer
+angle = 97.2 #from 97.2 to 112.5 degrees
+prev_angle = 97.2
+timer_time = 40
 
 
 #setting up pins
 GPIO.setmode(BCM)
 GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
-GPIO.setup(Servo_PWM, GPIO.OUT)
-GPIO.setup(DC_PWM, GPIO.OUT)
+GPIO.setup(Tilt_PWM, GPIO.OUT)
+GPIO.setup(DCT_1, GPIO.OUT)
+GPIO.setup(DCB_1, GPIO.OUT)
 GPIO.setup(DCT_2, GPIO.OUT)
 GPIO.setup(DCB_2, GPIO.OUT)
 
 #max rpi pwm frequency is 8khz
-servo = GPIO.PWM(Servo_PWM, 50) #servo pwm pin at 50hz
-shoot_motors = GPIO.PWM(DC_PWM, 1000) #firing motors pwm pin at 1000 hz
-servo.start(0)
-shoot_motors.start(0)
+tilt = GPIO.PWM(Tilt_PWM, 50) #servo pwm pin at 50hz
+loading = GPIO.PWM(Loading_PWM, 50) #firing motors pwm pin at 1000 hz
+tilt.start(7.9)
+loading.start()
 
 # com_array = [0,0] #scripts and y coordinate
 def move_x(array):
-    if array[0] == -1:
-        GPIO.output(DIR, CCW) # counter clockwise direction
-        GPIO.output(STEP, GPIO.HIGH)
-        sleep(delay)
-        GPIO.output(STEP, GPIO.LOW)
-        sleep(delay)
-        yaw -= 1
-    elif array[0] == 1:
-        GPIO.output(DIR, CW) #clockwise direction
-        GPIO.output(STEP, GPIO.HIGH)
-        sleep(delay)
-        GPIO.output(STEP, GPIO.LOW)
-        sleep(delay)
-        yaw += 1
+    if yaw < 200:
+        if array[0] == -1:
+            GPIO.output(DIR, CW) # counter clockwise direction
+            GPIO.output(STEP, GPIO.HIGH)
+            sleep(delay)
+            GPIO.output(STEP, GPIO.LOW)
+            sleep(delay)
+            yaw -= 1
+        elif array[0] == 1:
+            GPIO.output(DIR, CCW) #clockwise direction
+            GPIO.output(STEP, GPIO.HIGH)
+            sleep(delay)
+            GPIO.output(STEP, GPIO.LOW)
+            sleep(delay)
+            yaw += 1
+        else:
+            continue #do nothing
     else:
-        continue #do nothing
+        if yaw < 0:
+            GPIO.output(DIR, CCW)
+        elif yaw > 0:
+            GPIO.output(DIR, CW)
+        for steps in range(yaw):
+            GPIO.output(STEP, GPIO.HIGH)
+            sleep(delay)
+            GPIO.output(STEP, GPIO.LOW)
+            sleep(delay)
 
     #when shooting is complete, move everything back to origin
     if complete == 1:
         if yaw < 0:
-            GPIO.output(DIR, CW)
-        elif yaw > 0:
             GPIO.output(DIR, CCW)
+        elif yaw > 0:
+            GPIO.output(DIR, CW)
         for steps in range(yaw):
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
@@ -82,18 +100,18 @@ def move_x(array):
 
 
 def move_y(array):
-    duty = angle / 18 + 2 #duty cycle
+    duty = angle / 18 + 2.5 #duty cycle
 
     if array[1] == -1:  #decrease angle by 1
-        if angle != 0:
+        if angle > 97:
             angle -= 1
     elif array[1] == 1: #increase angle by 1
-        if angle != 180:
+        if angle < 113:
             angle += 1
     else:
         continue #do nothing
 
-    GPIO.output(Servo_PWM, True) #turn on pwm pin
+    GPIO.output(Tilt_PWM, True) #turn on pwm pin
 
     if prev_angle != angle: #move servo if there is a change in angle
         servo.ChangeDutyCycle(duty)
@@ -103,38 +121,44 @@ def move_y(array):
 
     #if complete, move back to origin
     if complete == 1:
-        servo.ChangeDutyCycle(2)
+        servo.ChangeDutyCycle(7.9)
 
-#power on dc motors when target is cited, stop powering when target has been shot
+#power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
     speed = 100 #0 - 100
     if array[2] == 1 and complete == 0: #1 for target found
-        shoot_motors.ChangeDutyCycle(speed)
+        GPIO.output(DCT_1, HIGH)
+        GPIO.output(DCB_1, HIGH)
         GPIO.output(DCT_2, LOW)
         GPIO.output(DCB_2, LOW)
 
     if complete == 1:
-        shoot_motors.ChangeDutyCycle(0)
+        GPIO.output(DCT_1, LOW)
+        GPIO.output(DCB_1, LOW)
         GPIO.output(DCT_2, LOW)
         GPIO.output(DCB_2, LOW)
 
 def timer(array):
     if array[2] == 1 and complete == 0:
+        start_time = time.time()
+        while (time.time() - start_time) < timer_time:
+            continue
+        complete = 1
         #insert timer code, 40 seconds
         #if 40 seconds have passed, complete  = 1
 
-    return
+    return complete
 
 #loading of balls using servo motor
 def load(com_array):
     #needs to be stopping at ball at neutral(?)<---confirm this with rest
     #servo arm goes back and moves forward in a certain timing range to push balls forward
+    
     return
 
 
 
 class Firing_Sys(Node):
-
     def __init__(self):
         super().__init__('firing_mechanism')
         self.subscription = self.create_subscription(
@@ -158,11 +182,6 @@ def main(args=None):
 
     rclpy.spin(minimal_subscriber)
 
-
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
     minimal_subscriber.destroy_node()
     rclpy.shutdown()
 
