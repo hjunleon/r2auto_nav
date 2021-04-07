@@ -1,4 +1,4 @@
-cd colcon_ws/src/
+cd /colcon_ws/src/
 rm -r scripts
 svn export https://github.com/hjunleon/r2auto_nav.git/trunk/Scripts/Workstation/scripts
 cd ..
