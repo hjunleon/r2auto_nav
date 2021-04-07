@@ -183,11 +183,11 @@ class Firing_Sys(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = MinimalSubscriber()
+    firing_sys = Firing_Sys()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(firing_sys)
 
-    minimal_subscriber.destroy_node()
+    firing_sys.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
