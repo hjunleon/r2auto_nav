@@ -16,7 +16,7 @@ import time
 
 # from std_msgs.msg import String
 from time import sleep
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 #pins based on BCM
 DIR = 22 #direction GPIO pin
@@ -76,8 +76,6 @@ def move_x(array):
             GPIO.output(STEP, GPIO.LOW)
             sleep(delay)
             yaw += 1
-        else:
-            continue #do nothing
     else:
         print("Exceeded pan range, returning to origin\n")
         if yaw < 0:
@@ -115,8 +113,6 @@ def move_y(array):
         if angle < 113:
             print("Tilt up\n")
             angle += 1
-    else:
-        continue #do nothing
 
     GPIO.output(Tilt_PWM, True) #turn on pwm pin
 
@@ -166,9 +162,6 @@ def load(com_array):
             sleep(1)
             loading.ChangeDutyCycle(7.9)
             sleep(1)
-    return
-
-
 
 class Firing_Sys(Node):
     def __init__(self):
