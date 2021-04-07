@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray, Float64MultiArray
+from std_msgs.msg import Int8MultiArray
 import keyboard
 
 
@@ -33,7 +33,7 @@ class CommandNode(Node):
             print(e)
 
         finally:
-            self.publisher_.publish(command)
+            self.publisher_.publish(self.array)
 
 
 def main(args=None):
