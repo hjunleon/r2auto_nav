@@ -7,7 +7,6 @@ import RPi.GPIO as GPIO
 Tilt_PWM = 18 #servo pwm pin
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(Tilt_PWM, GPIO.OUT)
 
 tilt = GPIO.PWM(Tilt_PWM, 50) #servo pwm pin at 50hz
 tilt.start(7.9)
