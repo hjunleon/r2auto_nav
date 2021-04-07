@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int8MultiArray, Float64MultiArray
 
+
 class CommandNode(Node):
 
     def __init__(self):
@@ -31,8 +32,8 @@ class CommandNode(Node):
         finally:
             self.publisher_.publish(command)
 
-def main(args=None):
 
+def main(args=None):
     rclpy.init(args=args)
     command_node = CommandNode()
     command_node.readKey()
@@ -41,5 +42,6 @@ def main(args=None):
 
     rclpy.shutdown()
 
-if __name == '__main__':
+
+if __name__ == '__main__':
     main()
