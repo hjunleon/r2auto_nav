@@ -18,6 +18,9 @@ import time
 from time import sleep
 import RPi.GPIO as GPIO
 
+#turn off warnings
+GPIO.setwarnings(False)
+
 #pins based on BCM
 DIR = 22 #direction GPIO pin
 STEP = 27 #step GPIO pin
@@ -183,12 +186,13 @@ class Firing_Sys(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = MinimalSubscriber()
+    firing_sys = Firing_Sys()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(firing_sys)
 
-    minimal_subscriber.destroy_node()
+    firing_sys.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
+    print("Actuation initialised\n")
