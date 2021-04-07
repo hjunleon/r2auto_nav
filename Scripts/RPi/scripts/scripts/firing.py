@@ -16,7 +16,7 @@ import time
 
 # from std_msgs.msg import String
 from time import sleep
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 #pins based on BCM
 DIR = 22 #direction GPIO pin
