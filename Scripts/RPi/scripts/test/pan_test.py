@@ -3,7 +3,7 @@
 #Description: Testing pan mechanism of turret
 
 from time import sleep
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 DIR = 22 #direction GPIO pin
 STEP = 27 #step GPIO pin

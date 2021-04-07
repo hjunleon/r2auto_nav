@@ -2,7 +2,7 @@
 #Author: jasshanK
 #Description: Testing tilt mechanism of turret
 
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 Tilt_PWM = 18 #servo pwm pin
 

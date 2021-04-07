@@ -3,7 +3,7 @@
 #Description: Testing firing and loading mechanism of turret
 
 from time import sleep
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 Loading_PWM= 12 #Loading servo pwm pibn
 DCT_1 = 10 #top firing motor pin 2
