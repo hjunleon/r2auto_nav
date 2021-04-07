@@ -18,6 +18,9 @@ import time
 from time import sleep
 import RPi.GPIO as GPIO
 
+#turn off warnings
+GPIO.setwarnings(False)
+
 #pins based on BCM
 DIR = 22 #direction GPIO pin
 STEP = 27 #step GPIO pin
@@ -192,3 +195,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+    print("Actuation initialised\n")
