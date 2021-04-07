@@ -184,6 +184,7 @@ class Firing_Sys(Node):
         timer(com_array.data)
 
 def main(args=None):
+    print("Actuation initialised\n")
     rclpy.init(args=args)
 
     firing_sys = Firing_Sys()
@@ -195,4 +196,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-    print("Actuation initialised\n")
