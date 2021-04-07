@@ -23,6 +23,7 @@ setup(
             'thermal_test = scripts.thermal_test:main',
             'thermal_interpolate = scripts.thermal_interpolate:main',
             'command_pub = scripts.command_pub:main',
+            'actuation = scripts.firing:main',
         ],
     },
 )
