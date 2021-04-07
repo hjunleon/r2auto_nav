@@ -18,6 +18,9 @@ GPIO.setup(DCB_1, GPIO.OUT)
 GPIO.setup(DCT_2, GPIO.OUT)
 GPIO.setup(DCB_2, GPIO.OUT)
 
+loading = GPIO.PWM(Loading_PWM, 50) #firing motors pwm pin at 1000 hz
+loading.start(8.75)
+
 #checks for f or s
 def fire(start):
     if start == 'y':
