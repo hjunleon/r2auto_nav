@@ -9,9 +9,9 @@ class CommandNode(Node):
     def __init__(self):
         super().__init__('com_node')
         self.publisher_ = self.create_publisher(Int8MultiArray, 'com_node', 10)
+        self.array = Int8MultiArray()
 
     def readKey(self):
-        array = Int8MultiArray()
         command = [0, 0, 1]
         try:
             while True:
@@ -26,8 +26,8 @@ class CommandNode(Node):
                 if key == 'd':
                     command[0] = 1
 
-                array.data = command
-                self.publisher_.publish(array)
+                self.array.data = command
+                self.publisher_.publish(self.array)
                 command = [0, 0, 1]
         except Exception as e:
             print(e)
