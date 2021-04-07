@@ -37,10 +37,12 @@ def fire(start):
 #check for y or n
 def load(release):
     if release == "y":
+        GPIO.output(Loading_PWM, True)
         loading.ChangeDutyCycle(2.92)
         sleep(1)
         loading.ChangeDutyCycle(7.9)
         sleep(1)
+        GPIO.output(Loading_PWM, True)
 
 while True:
     start = input("Start motors? y/n/enter to skip: \n")

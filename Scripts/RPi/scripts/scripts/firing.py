@@ -159,6 +159,7 @@ def load(com_array):
     #needs to be stopping at ball at neutral(?)<---confirm this with rest
     #servo arm goes back and moves forward in a certain timing range to push balls forward
     if array[0] == 0 and array[1] == 0:
+        GPIO.output(Loading_PWM, True)
         for i in range(3):
             print("Loading ball\n")
             loading.ChangeDutyCycle(2.92)

@@ -18,8 +18,10 @@ def tilt(angle):
     duty = angle / 18 + 2.5
 
     if angle > 97 and angle < 113:
+        GPIO.output(Tilt_PWM, True)
         tilt.ChangeDutyCycle(duty)
         sleep(1)
+        GPIO.output(Tilt_PWM, False)
     else:
         print("Angle not withing range, please try again\n")
 
