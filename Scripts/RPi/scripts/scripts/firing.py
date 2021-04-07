@@ -41,7 +41,7 @@ timer_time = 40
 
 
 #setting up pins
-GPIO.setmode(BCM)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
 GPIO.setup(Tilt_PWM, GPIO.OUT)

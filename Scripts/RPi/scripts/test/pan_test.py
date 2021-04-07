@@ -13,7 +13,7 @@ CW = 1 #clockwise
 CCW = 0 #counter clockwise
 yaw = 0 #keep track of relative position of top layer
 
-GPIO.setmode(BCM)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
 

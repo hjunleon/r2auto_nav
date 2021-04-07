@@ -11,6 +11,7 @@ DCB_1 = 11 #bottom firing motor pin 2
 DCT_2 = 9 #top firing motor pin 2
 DCB_2 = 8 #bottom firing motor pin 2
 
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(Loading_PWM, GPIO.OUT)
 GPIO.setup(DCT_1, GPIO.OUT)
 GPIO.setup(DCB_1, GPIO.OUT)
