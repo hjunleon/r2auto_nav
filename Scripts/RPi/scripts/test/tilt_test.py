@@ -3,6 +3,7 @@
 #Description: Testing tilt mechanism of turret
 
 import RPi.GPIO as GPIO
+from time import sleep
 
 Tilt_PWM = 18 #servo pwm pin
 
@@ -13,7 +14,7 @@ tilt = GPIO.PWM(Tilt_PWM, 50) #servo pwm pin at 50hz
 tilt.start(7.9)
 
 
-def tilt(angle):
+def rotate(angle):
     angle = float(angle)
     duty = angle / 18 + 2.5
 
@@ -27,4 +28,4 @@ def tilt(angle):
 
 while True:
     angle = input("Input angle between 98 and 112: \n")
-    tilt(angle)
+    rotate(angle)
