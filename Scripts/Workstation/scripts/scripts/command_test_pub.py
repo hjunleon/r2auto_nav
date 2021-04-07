@@ -8,7 +8,6 @@ class CommandNode(Node):
     def __init__(self):
         super().__init__('com_node')
         self.publisher_ = self.create_publisher(Int8MultiArray, 'com_node', 10)
-        self.publisher_  # prevent unused variable warning
 
     def readKey(self):
         command = [0, 0, 1]
