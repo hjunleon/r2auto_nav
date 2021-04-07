@@ -33,7 +33,7 @@ class CommandNode(Node):
             print(e)
 
         finally:
-            self.publisher_.publish(command)
+            self.publisher_.publish(self.array)
 
 
 def main(args=None):
