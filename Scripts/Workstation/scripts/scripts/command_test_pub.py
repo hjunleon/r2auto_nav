@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int8MultiArray, Float64MultiArray
+import keyboard
 
 
 class CommandNode(Node):
@@ -14,7 +15,8 @@ class CommandNode(Node):
         command = [0, 0, 1]
         try:
             while True:
-                key = str(input('w a s d for movement'))
+                print('W A S D for movement')
+                key = keyboard.read_key()
                 if key == 'w':
                     command[1] = 1
                 if key == 'a':
