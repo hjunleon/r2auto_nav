@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray, Float64MultiArray
+from std_msgs.msg import Int8MultiArray
 import keyboard
 
 
