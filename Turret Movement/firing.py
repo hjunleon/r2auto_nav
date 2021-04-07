@@ -45,6 +45,7 @@ GPIO.setmode(BCM)
 GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
 GPIO.setup(Tilt_PWM, GPIO.OUT)
+GPIO.setup(Loading_PWM, GPIO.OUT)
 GPIO.setup(DCT_1, GPIO.OUT)
 GPIO.setup(DCB_1, GPIO.OUT)
 GPIO.setup(DCT_2, GPIO.OUT)
@@ -56,12 +57,12 @@ loading = GPIO.PWM(Loading_PWM, 50) #firing motors pwm pin at 1000 hz
 tilt.start(7.9)
 loading.start(8.75)
 
-# com_array = [0,0] #scripts and y coordinate
+# com_array = [0,0] #x and y coordinate
 def move_x(array):
     if yaw < 200:
         if array[0] == -1:
             GPIO.output(DIR, CW) # counter clockwise direction
-            print("Pan left")
+            print("Pan left\n")
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
             GPIO.output(STEP, GPIO.LOW)
@@ -69,7 +70,7 @@ def move_x(array):
             yaw -= 1
         elif array[0] == 1:
             GPIO.output(DIR, CCW) #clockwise direction
-            print("Pan right")
+            print("Pan right\n")
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
             GPIO.output(STEP, GPIO.LOW)
@@ -78,7 +79,7 @@ def move_x(array):
         else:
             continue #do nothing
     else:
-        print("Exceeded pan range, returning to origin")
+        print("Exceeded pan range, returning to origin\n")
         if yaw < 0:
             GPIO.output(DIR, CCW)
         elif yaw > 0:
@@ -91,7 +92,7 @@ def move_x(array):
 
     #when shooting is complete, move everything back to origin
     if complete == 1:
-        print("Shooting complete, pan returning to origin")
+        print("Shooting complete, pan returning to origin\n")
         if yaw < 0:
             GPIO.output(DIR, CCW)
         elif yaw > 0:
@@ -108,11 +109,11 @@ def move_y(array):
 
     if array[1] == -1:  #decrease angle by 1
         if angle > 97:
-            print("Tilt down")
+            print("Tilt down\n")
             angle -= 1
     elif array[1] == 1: #increase angle by 1
         if angle < 113:
-            print("Tilt up")
+            print("Tilt up\n")
             angle += 1
     else:
         continue #do nothing
@@ -127,23 +128,23 @@ def move_y(array):
 
     #if complete, move back to origin
     if complete == 1:
-        print("Firing complete, tilt return to origin")
+        print("Firing complete, tilt return to origin\n")
         servo.ChangeDutyCycle(7.9)
 
 #power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
     if array[2] == 1 and complete == 0: #1 for target found
-        GPIO.output(DCT_1, HIGH)
-        GPIO.output(DCB_1, HIGH)
-        GPIO.output(DCT_2, LOW)
-        GPIO.output(DCB_2, LOW)
+        GPIO.output(DCT_1, GPIO.HIGH)
+        GPIO.output(DCB_1, GPIO.HIGH)
+        GPIO.output(DCT_2, GPIO.LOW)
+        GPIO.output(DCB_2, GPIO.LOW)
 
     if complete == 1:
-        print("Firing complete, motors whining down")
-        GPIO.output(DCT_1, LOW)
-        GPIO.output(DCB_1, LOW)
-        GPIO.output(DCT_2, LOW)
-        GPIO.output(DCB_2, LOW)
+        print("Firing complete, motors whining down\n")
+        GPIO.output(DCT_1, GPIO.LOW)
+        GPIO.output(DCB_1, GPIO.LOW)
+        GPIO.output(DCT_2, GPIO.LOW)
+        GPIO.output(DCB_2, GPIO.LOW)
 
 #if 40 seconds have passed, complete  = 1
 def timer(array):
@@ -160,7 +161,7 @@ def load(com_array):
     #servo arm goes back and moves forward in a certain timing range to push balls forward
     if array[0] == 0 and array[1] == 0:
         for i in range(3):
-            print("Loading ball")
+            print("Loading ball\n")
             loading.ChangeDutyCycle(2.92)
             sleep(1)
             loading.ChangeDutyCycle(7.9)
