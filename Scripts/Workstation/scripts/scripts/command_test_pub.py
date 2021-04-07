@@ -1,7 +1,6 @@
-from rclpy import Node
+from rclpy.node import Node
 import rclpy
 from std_msgs.msg import Int8MultiArray, Float64MultiArray
-
 
 class CommandNode(Node):
 
