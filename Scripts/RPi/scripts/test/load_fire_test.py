@@ -3,7 +3,7 @@
 #Description: Testing firing and loading mechanism of turret
 
 from time import sleep
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 Loading_PWM= 12 #Loading servo pwm pibn
 DCT_1 = 10 #top firing motor pin 2
@@ -17,6 +17,9 @@ GPIO.setup(DCT_1, GPIO.OUT)
 GPIO.setup(DCB_1, GPIO.OUT)
 GPIO.setup(DCT_2, GPIO.OUT)
 GPIO.setup(DCB_2, GPIO.OUT)
+
+loading = GPIO.PWM(Loading_PWM, 50) #firing motors pwm pin at 1000 hz
+loading.start(8.75)
 
 #checks for f or s
 def fire(start):
@@ -34,10 +37,12 @@ def fire(start):
 #check for y or n
 def load(release):
     if release == "y":
+        GPIO.output(Loading_PWM, True)
         loading.ChangeDutyCycle(2.92)
         sleep(1)
         loading.ChangeDutyCycle(7.9)
         sleep(1)
+        GPIO.output(Loading_PWM, True)
 
 while True:
     start = input("Start motors? y/n/enter to skip: \n")
