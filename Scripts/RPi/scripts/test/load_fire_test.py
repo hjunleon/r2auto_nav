@@ -6,33 +6,12 @@ from time import sleep
 import RPi.GPIO as GPIO
 
 Loading_PWM= 12 #Loading servo pwm pibn
-DCT_1 = 10 #top firing motor pin 2
-DCB_1 = 11 #bottom firing motor pin 2
-DCT_2 = 9 #top firing motor pin 2
-DCB_2 = 8 #bottom firing motor pin 2
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(Loading_PWM, GPIO.OUT)
-GPIO.setup(DCT_1, GPIO.OUT)
-GPIO.setup(DCB_1, GPIO.OUT)
-GPIO.setup(DCT_2, GPIO.OUT)
-GPIO.setup(DCB_2, GPIO.OUT)
 
 loading = GPIO.PWM(Loading_PWM, 50) #firing motors pwm pin at 1000 hz
 loading.start(8.75)
-
-#checks for f or s
-def fire(start):
-    if start == 'y':
-        GPIO.output(DCT_1, GPIO.HIGH)
-        GPIO.output(DCB_1, GPIO.HIGH)
-        GPIO.output(DCT_2, GPIO.LOW)
-        GPIO.output(DCB_2, GPIO.LOW)
-    elif start == 'n':
-        GPIO.output(DCT_1, GPIO.LOW)
-        GPIO.output(DCB_1, GPIO.LOW)
-        GPIO.output(DCT_2, GPIO.LOW)
-        GPIO.output(DCB_2, GPIO.LOW)
 
 #check for y or n
 def load(release):
@@ -43,9 +22,12 @@ def load(release):
         loading.ChangeDutyCycle(7.9)
         sleep(1)
         GPIO.output(Loading_PWM, True)
-
-while True:
-    start = input("Start motors? y/n/enter to skip: \n")
-    release = input("Release ball? y/n: \n")
-    fire(start)
-    load(release)
+try:
+    while True:
+        release = input("Release ball? y/n: \n")
+        load(release)
+except Exception as e:
+    print(e)
+    GPIO.cleanup()
+finally:
+    GPIO.cleanup()

@@ -5,7 +5,6 @@
 import RPi.GPIO as GPIO
 from time import sleep
 
-Tilt_PWM = 18 #servo pwm pin
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(Tilt_PWM, GPIO.OUT)
