@@ -64,19 +64,21 @@ def move_x(array):
         if array[0] == -1:
             GPIO.output(DIR, CW)
             print("Pan left\n")
-            GPIO.output(STEP, GPIO.HIGH)
-            sleep(delay)
-            GPIO.output(STEP, GPIO.LOW)
-            sleep(delay)
-            yaw -= 1
+            for i in range(2):
+                GPIO.output(STEP, GPIO.HIGH)
+                sleep(delay)
+                GPIO.output(STEP, GPIO.LOW)
+                sleep(delay)
+                yaw -= 1
         elif array[0] == 1:
             GPIO.output(DIR, CCW)
             print("Pan right\n")
-            GPIO.output(STEP, GPIO.HIGH)
-            sleep(delay)
-            GPIO.output(STEP, GPIO.LOW)
-            sleep(delay)
-            yaw += 1
+            for i in range(2):
+                GPIO.output(STEP, GPIO.HIGH)
+                sleep(delay)
+                GPIO.output(STEP, GPIO.LOW)
+                sleep(delay)
+                yaw += 1
     else:
         print("Exceeded pan range, returning to origin\n")
         if yaw < 0:
@@ -140,7 +142,7 @@ def move_y(array):
 def fire(array):
     if array[0] == 0 and array[1] == 0 and complete == 0:  # 1 for target found
         GPIO.output(M1, GPIO.HIGH)
-        motor.ChangeDutyCycle(50)
+        motor.ChangeDutyCycle(30)
 
     if complete == 1:
         print("Firing complete, motors whining down\n")
@@ -164,13 +166,13 @@ def load(array):
     # servo arm goes back and moves forward in a certain timing range to push balls forward
     if array[0] == 0 and array[1] == 0:
         GPIO.output(Loading_PWM, True)
-        for i in range(3):
+        for i in range(4):
             print("Loading ball\n")
-            loading.ChangeDutyCycle(2.92)
+            loading.ChangeDutyCycle(2.8)
             sleep(1)
             loading.ChangeDutyCycle(7.9)
             sleep(1)
-            if i == 2:
+            if i == 3:
                 complete = 1
                 GPIO.output(Loading_PWM, False)
 
