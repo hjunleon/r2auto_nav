@@ -31,6 +31,7 @@ M1 = 26  # firing motors pin
 M_PWM = 13  # bottom firing motor pin 2
 
 # constants
+global SPR, delay, CW, CCW, complete, yaw, angle, prev_angle
 SPR = 200  # steps per revolution, 360/1.8
 delay = 0.005 / 32
 CW = 1  # clockwise
@@ -39,7 +40,6 @@ complete = 0  # turns to 1 when firing is complete, controlled by a timer
 yaw = 0  # keep track of relative position of top layer
 angle = 97.2  # from 97.2 to 112.5 degrees
 prev_angle = 97.2
-timer_time = 40
 
 # setting up pins
 GPIO.setmode(GPIO.BCM)
@@ -126,7 +126,7 @@ def move_y(array):
     GPIO.output(Tilt_PWM, True)  # turn on pwm pin
 
     if prev_angle != angle:  # move servo if there is a change in angle
-        servo.ChangeDutyCycle(duty)
+        tilt.ChangeDutyCycle(duty)
         sleep(1)
 
     prev_angle = angle  # check whats the prev angle
@@ -134,7 +134,7 @@ def move_y(array):
     # if complete, move back to origin
     if complete == 1:
         print("Firing complete, tilt return to origin\n")
-        servo.ChangeDutyCycle(7.9)
+        tilt.ChangeDutyCycle(7.9)
 
 
 # power on dc motors when target is sighted, stop powering when target has been shot
@@ -160,7 +160,7 @@ def fire(array):
 
 
 # loading of balls using servo motor
-def load(com_array):
+def load(array):
     # needs to be stopping at ball at neutral(?)<---confirm this with rest
     # servo arm goes back and moves forward in a certain timing range to push balls forward
     if array[0] == 0 and array[1] == 0:
@@ -191,7 +191,6 @@ class Firing_Sys(Node):
         move_y(com_array.data)
         fire(com_array.data)
         load(com_array.data)
-        timer(com_array.data)
 
 
 def main(args=None):
