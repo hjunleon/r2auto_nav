@@ -31,15 +31,9 @@ M1 = 26  # firing motors pin
 M_PWM = 13  # bottom firing motor pin 2
 
 # constants
-global SPR, delay, CW, CCW, complete, yaw, angle, prev_angle
-SPR = 200  # steps per revolution, 360/1.8
-delay = 0.005 / 32
-CW = 1  # clockwise
-CCW = 0  # counter clockwise
+global complete
 complete = 0  # turns to 1 when firing is complete, controlled by a timer
-yaw = 0  # keep track of relative position of top layer
-angle = 97.2  # from 97.2 to 112.5 degrees
-prev_angle = 97.2
+
 
 # setting up pins
 GPIO.setmode(GPIO.BCM)
@@ -62,6 +56,11 @@ motor.start(0)
 
 # com_array = [0,0] #x and y coordinate
 def move_x(array):
+    yaw = 0  # keep track of relative position of top layer\
+    CW = 1  # clockwise
+    CCW = 0  # counter clockwise
+    SPR = 200  # steps per revolution, 360/1.8
+    delay = 0.005 / 32
     GPIO.output(STEPPER_EN, GPIO.LOW)
     if yaw < 200:
         if array[0] == -1:
@@ -112,6 +111,8 @@ def move_x(array):
 
 
 def move_y(array):
+    angle = 97.2  # from 97.2 to 112.5 degrees
+    prev_angle = 97.2
     duty = angle / 18 + 2.5  # duty cycle
 
     if array[1] == -1:  # decrease angle by 1
