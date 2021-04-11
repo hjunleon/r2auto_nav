@@ -140,7 +140,7 @@ def move_y(array):
 
 # power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
-    if array[0] == 0 and array[1] == 0 and complete == 0:  # 1 for target found
+    if array[0] == 0 and array[1] == 0 and array[2] == 1 and complete == 0:  # 1 for target found
         GPIO.output(M1, GPIO.HIGH)
         motor.ChangeDutyCycle(30)
 
