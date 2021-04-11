@@ -5,7 +5,7 @@
 from time import sleep
 import RPi.GPIO as GPIO
 
-EN = 17
+EN = 6
 DIR = 22  # direction GPIO pin
 STEP = 27  # step GPIO pin
 
