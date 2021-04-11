@@ -56,13 +56,13 @@ motor.start(0)
 # com_array = [0,0] #x and y coordinate
 def move_x(array):
     yaw = 0  # keep track of relative position of top layer\
-    CW = 1  # clockwise
-    CCW = 0  # counter clockwise
+    CW = 0  # clockwise
+    CCW = 1  # counter clockwise
     delay = 0.005 / 32
     GPIO.output(STEPPER_EN, GPIO.LOW)
     if yaw < 200:
         if array[0] == -1:
-            GPIO.output(DIR, CW)  # counter clockwise direction
+            GPIO.output(DIR, CW)
             print("Pan left\n")
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
@@ -70,7 +70,7 @@ def move_x(array):
             sleep(delay)
             yaw -= 1
         elif array[0] == 1:
-            GPIO.output(DIR, CCW)  # clockwise direction
+            GPIO.output(DIR, CCW)
             print("Pan right\n")
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
