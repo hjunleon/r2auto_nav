@@ -23,6 +23,7 @@ class Plotter(Node):
 
     def __init__(self):
         super().__init__('plotter')
+        print('run')
         self.subscription = self.create_subscription(Float64MultiArray, 'heat_array', self.listener_callback, 10)
         self.subscription  # prevent unused variable warning
 
