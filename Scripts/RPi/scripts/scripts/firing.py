@@ -45,6 +45,7 @@ timer_time = 40
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
+GPIO.setup(STEPPER_EN, GPIO.OUT)
 GPIO.setup(Tilt_PWM, GPIO.OUT)
 GPIO.setup(Loading_PWM, GPIO.OUT)
 GPIO.setup(M1, GPIO.OUT)
@@ -61,6 +62,7 @@ motor.start(0)
 
 # com_array = [0,0] #x and y coordinate
 def move_x(array):
+    GPIO.output(STEPPER_EN, GPIO.LOW)
     if yaw < 200:
         if array[0] == -1:
             GPIO.output(DIR, CW)  # counter clockwise direction
@@ -84,11 +86,16 @@ def move_x(array):
             GPIO.output(DIR, CCW)
         elif yaw > 0:
             GPIO.output(DIR, CW)
-        for steps in range(yaw):
+        while yaw != 0:
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
             GPIO.output(STEP, GPIO.LOW)
             sleep(delay)
+            yaw -= 1
+
+    #turn off stepper
+    if yaw == 0 and complete == 1:
+        GPIO.output(STEPPER_EN, GPIO.HIGH)
 
     # when shooting is complete, move everything back to origin
     if complete == 1:
@@ -133,27 +140,23 @@ def move_y(array):
 # power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
     if array[2] == 1 and complete == 0:  # 1 for target found
-        GPIO.output(DCT_1, GPIO.HIGH)
-        GPIO.output(DCB_1, GPIO.HIGH)
-        GPIO.output(DCT_2, GPIO.LOW)
-        GPIO.output(DCB_2, GPIO.LOW)
+        GPIO.output(M1, GPIO.HIGH)
+        motor.ChangeDutyCycle(50)
 
     if complete == 1:
         print("Firing complete, motors whining down\n")
-        GPIO.output(DCT_1, GPIO.LOW)
-        GPIO.output(DCB_1, GPIO.LOW)
-        GPIO.output(DCT_2, GPIO.LOW)
-        GPIO.output(DCB_2, GPIO.LOW)
+        GPIO.output(M1, GPIO.LOW)
+        motor.ChangeDutyCycle(0)
 
 
 # if 40 seconds have passed, complete  = 1
-def timer(array):
-    if array[2] == 1 and complete == 0:
-        start_time = time.time()
-        while (time.time() - start_time) < timer_time:
-            return
-        complete = 1
-    return complete
+# def timer(array):
+#     if array[2] == 1 and complete == 0:
+#         start_time = time.time()
+#         while (time.time() - start_time) < timer_time:
+#             return
+#         complete = 1
+#     return complete
 
 
 # loading of balls using servo motor
@@ -168,6 +171,9 @@ def load(com_array):
             sleep(1)
             loading.ChangeDutyCycle(7.9)
             sleep(1)
+            if i == 2:
+                complete = 1
+                GPIO.output(Loading_PWM, False)
 
 
 class Firing_Sys(Node):
@@ -200,5 +206,13 @@ def main(args=None):
     rclpy.shutdown()
 
 
+
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        GPIO.cleanup()
+        tilt.stop()
+        loading.stop()
+        motor.stop()
