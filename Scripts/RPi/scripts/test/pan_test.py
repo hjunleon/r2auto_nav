@@ -9,7 +9,7 @@ EN = 6
 DIR = 22  # direction GPIO pin
 STEP = 27  # step GPIO pin
 
-step = 200
+step = 100
 delay = 3000 * (10 ** -6)
 CW = 1  # clockwise
 CCW = 0  # counter clockwise
@@ -42,9 +42,11 @@ try:
         pan(direction)
         sleep(delay)
 except Exception as e:
+    GPIO.output(EN, GPIO.HIGH)
     print(e)
     GPIO.cleanup()
 
 finally:
+    GPIO.output(EN, GPIO.HIGH)
     GPIO.cleanup()
 
