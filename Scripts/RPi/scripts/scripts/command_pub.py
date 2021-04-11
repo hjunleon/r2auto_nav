@@ -69,9 +69,9 @@ def command(coord):
 
     if xdiff >= radius_thres:
         if coord[0] < resolution // 2:
-            command_list[0] = -1
-        elif coord[0] > resolution // 2:
             command_list[0] = 1
+        elif coord[0] > resolution // 2:
+            command_list[0] = -1
     else:
         command_list[0] = 0
 
