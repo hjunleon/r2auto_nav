@@ -28,7 +28,7 @@ class Plotter(Node):
 
     def listener_callback(self, array):
         heat_array = np.reshape(array.data, (resolution, resolution))
-        print(heat_array)
+        # print(heat_array)
         heat_img = Image.fromarray(np.uint8(heat_array), 'L')
         graph = plt.imshow(heat_img, cmap=plt.cm.hot)  # viridis, plasma, inferno, magma, cividis
         plt.clim(20, 60)
