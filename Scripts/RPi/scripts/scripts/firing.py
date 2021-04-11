@@ -12,7 +12,6 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int8MultiArray
-import time
 
 # from std_msgs.msg import String
 from time import sleep
@@ -59,7 +58,6 @@ def move_x(array):
     yaw = 0  # keep track of relative position of top layer\
     CW = 1  # clockwise
     CCW = 0  # counter clockwise
-    SPR = 200  # steps per revolution, 360/1.8
     delay = 0.005 / 32
     GPIO.output(STEPPER_EN, GPIO.LOW)
     if yaw < 200:
@@ -140,7 +138,7 @@ def move_y(array):
 
 # power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
-    if array[2] == 1 and complete == 0:  # 1 for target found
+    if array[0] == 0 and array[1] == 0 and complete == 0:  # 1 for target found
         GPIO.output(M1, GPIO.HIGH)
         motor.ChangeDutyCycle(50)
 
