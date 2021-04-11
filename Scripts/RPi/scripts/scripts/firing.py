@@ -12,7 +12,6 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int8MultiArray
-import time
 
 # from std_msgs.msg import String
 from time import sleep
@@ -59,7 +58,6 @@ def move_x(array):
     yaw = 0  # keep track of relative position of top layer\
     CW = 1  # clockwise
     CCW = 0  # counter clockwise
-    SPR = 200  # steps per revolution, 360/1.8
     delay = 0.005 / 32
     GPIO.output(STEPPER_EN, GPIO.LOW)
     if yaw < 200:
