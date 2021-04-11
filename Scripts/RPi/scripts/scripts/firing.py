@@ -164,7 +164,7 @@ def fire(array):
 def load(array):
     # needs to be stopping at ball at neutral(?)<---confirm this with rest
     # servo arm goes back and moves forward in a certain timing range to push balls forward
-    if array[0] == 0 and array[1] == 0:
+    if array[0] == 0 and array[1] == 0 and array[2] == 1 and complete == 0:
         GPIO.output(Loading_PWM, True)
         for i in range(4):
             print("Loading ball\n")
