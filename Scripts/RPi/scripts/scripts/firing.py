@@ -164,7 +164,7 @@ class FiringSys(Node):
         # sub 1 for x axis
         self.subscription = self.create_subscription(
             Float32MultiArray,  # topic
-            'com_node_x',
+            'com_node',
             self.callback_x,
             10)
         self.subscription  # prevent unused variable warning
@@ -172,7 +172,7 @@ class FiringSys(Node):
         # sub 2 for y_axis, fire and load
         self.subscription_ = self.create_subscription(
             Float32MultiArray,  # topic
-            'com_node_y',
+            'com_node',
             self.callback_y,
             10)
         self.subscription_  # prevent unused variable warning
