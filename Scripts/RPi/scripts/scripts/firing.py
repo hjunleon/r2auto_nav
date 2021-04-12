@@ -11,11 +11,12 @@
 # create timer to tell when shooting has stopped from first retrieval of target detection
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray
+from std_msgs.msg import Float32MultiArray, String
 
 # from std_msgs.msg import String
 from time import sleep
 import pigpio
+from multiprocessing import Process
 
 # pins based on BCM
 DIR = 22  # direction GPIO pin
@@ -26,178 +27,176 @@ Loading_PWM = 12  # Loading servo pwm pin
 M1 = 26  # firing motors pin
 M_PWM = 13  # bottom firing motor pin 2
 
-# constants
-global complete
+# global constants
 complete = 0  # turns to 1 when firing is complete, controlled by a timer
-
+done = 0 #turns to 1 when actuation is reset
 
 # setting up pins
 pi = pigpio.pi()
-pi.set_mode(DIR, pigpio.OUTPUT)
-pi.set_mode(STEP, pigpio.OUTPUT)
-pi.set_mode(STEPPER_EN, pigpio.OUTPUT)
-pi.set_mode(Tilt_PWM, pigpio.OUTPUT)
-pi.set_mode(Loading_PWM, pigpio.OUTPUT)
-pi.set_mode(M1, pigpio.OUTPUT)
-pi.set_mode(M_PWM, pigpio.OUTPUT)
+pi.set_mode(DIR, pipi.write)
+pi.set_mode(STEP, pipi.write)
+pi.set_mode(STEPPER_EN, pipi.write)
+pi.set_mode(Tilt_PWM, pipi.write)
+pi.set_mode(Loading_PWM, pipi.write)
+pi.set_mode(M1, pipi.write)
+pi.set_mode(M_PWM, pipi.write)
 
-# max rpi pwm frequency is 8khz
-# servo pwm pin at 50hz
-# firing motors pwm pin at 1000 hz
+# setting up PWM
 pi.set_PWM_frequency(M_PWM, 1000)  # motor pwm at 1000 hz
 pi.set_servo_pulsewidth(Tilt_PWM, 1650) # upwards: 1650, flat: 1840
 pi.set_servo_pulsewidth(Loading_PWM, 700) # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
 
-
-# com_array = [0,0] #x and y coordinate
+# com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
 def move_x(array):
+    sleep(1) # pseudo debouncing
+
+    global complete, done
+    step_limit = 200 # max number of steps
     yaw = 0  # keep track of relative position of top layer\
-    CW = 0  # clockwise
-    CCW = 1  # counter clockwise
+    cw = 0  # clockwise
+    ccw = 1  # counter clockwise
     delay = 0.005 / 32
     pi.write(STEPPER_EN, 0)
-    if yaw < 200:
-        if array[0] == -1:
-            pi.write(DIR, CW)
+    if yaw < step_limit and complete == 0:
+        if array[0] < 0:
+            pi.write(DIR, cw)
             print("Pan left\n")
-            for i in range(2):
+            for i in range(int(array[0] // 1.8)):
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
                 yaw -= 1
-        elif array[0] == 1:
-            pi.write(DIR, CCW)
+        elif array[0] > 0:
+            pi.write(DIR, ccw)
             print("Pan right\n")
-            for i in range(2):
+            for i in range(int(array[0] // 1.8)):
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
                 yaw += 1
-    else:
+    # in case yaw exceeds recommended range
+    elif yaw > step_limit and complete == 0:
         print("Exceeded pan range, returning to origin\n")
-        if yaw < 0:
-            p(DIR, CCW)
-        elif yaw > 0:
-            GPIO.output(DIR, CW)
         while yaw != 0:
-            GPIO.output(STEP, GPIO.HIGH)
+            # barrel on the right
+            if yaw > 0:
+                p.write(DIR, cw)
+                yaw -= 1
+            # barrel on the left
+            elif yaw < 0:
+                pi.write(DIR, ccw)
+                yaw += 1
+            pi.write(STEP, 1)
             sleep(delay)
-            GPIO.output(STEP, GPIO.LOW)
+            pi.write(STEP, 0)
             sleep(delay)
-            yaw -= 1
-
-    #turn off stepper
-    if yaw == 0 and complete == 1:
-        GPIO.output(STEPPER_EN, GPIO.HIGH)
 
     # when shooting is complete, move everything back to origin
     if complete == 1:
         print("Shooting complete, pan returning to origin\n")
-        if yaw < 0:
-            GPIO.output(DIR, CCW)
-        elif yaw > 0:
-            GPIO.output(DIR, CW)
+        if yaw > 0:
+            pi.write(DIR, cw)
+            yaw -= 1
+        elif yaw < 0:
+            pi.write(DIR, ccw)
+            yaw += 1
         for steps in range(yaw):
-            GPIO.output(STEP, GPIO.HIGH)
+            pi.write(STEP, 1)
             sleep(delay)
-            GPIO.output(STEP, GPIO.LOW)
+            pi.write(STEP, 0)
             sleep(delay)
 
+    #turn off stepper
+    if yaw == 0 and complete == 1:
+        pi.write(STEPPER_EN, 1)
+        done = 1
 
 def move_y(array):
-    angle = 97.2  # from 97.2 to 112.5 degrees
-    prev_angle = 97.2
-    duty = angle / 18 + 2.5  # duty cycle
+    sleep(1)  # pseudo debouncing
 
-    if array[1] == -1:  # decrease angle by 1
-        if angle > 97:
-            print("Tilt down\n")
-            angle -= 1
-    elif array[1] == 1:  # increase angle by 1
-        if angle < 113:
-            print("Tilt up\n")
-            angle += 1
+    global complete
+    flat_angle = 1850
+    pulse = flat_angle - 10*(array[1]) #formula to translate angle to pulse width
 
-    GPIO.output(Tilt_PWM, True)  # turn on pwm pin
+    if complete == 0:
+        pi.pi.set_servo_pulsewidth(Tilt_PWM, pulse)
+        sleep(0.5)
 
-    if prev_angle != angle:  # move servo if there is a change in angle
-        tilt.ChangeDutyCycle(duty)
-        sleep(1)
-
-    prev_angle = angle  # check whats the prev angle
-
-    # if complete, move back to origin
     if complete == 1:
-        print("Firing complete, tilt return to origin\n")
-        tilt.ChangeDutyCycle(7.9)
-
+        pi.set_servo_pulsewidth(Tilt_PWM, flat_angle)
+        sleep(0.5)
 
 # power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
+    global complete
     if array[0] == 0 and array[1] == 0 and array[2] == 1 and complete == 0:  # 1 for target found
-        GPIO.output(M1, GPIO.HIGH)
-        motor.ChangeDutyCycle(30)
+        pi.write(M1, 1)
+        pi.set_PWM_dutycycle(13, 180) # motor on
 
     if complete == 1:
         print("Firing complete, motors whining down\n")
-        GPIO.output(M1, GPIO.LOW)
-        motor.ChangeDutyCycle(0)
-
-
-# if 40 seconds have passed, complete  = 1
-# def timer(array):
-#     if array[2] == 1 and complete == 0:
-#         start_time = time.time()
-#         while (time.time() - start_time) < timer_time:
-#             return
-#         complete = 1
-#     return complete
-
+        pi.write(M1, 0)
+        pi.set_PWM_dutycycle(13, 0) # motor off
 
 # loading of balls using servo motor
 def load(array):
+    global complete
     # needs to be stopping at ball at neutral(?)<---confirm this with rest
     # servo arm goes back and moves forward in a certain timing range to push balls forward
     if array[0] == 0 and array[1] == 0 and array[2] == 1 and complete == 0:
-        GPIO.output(Loading_PWM, True)
         for i in range(4):
             print("Loading ball\n")
-            loading.ChangeDutyCycle(2.8)
-            sleep(1)
-            loading.ChangeDutyCycle(7.9)
-            sleep(1)
+            pi.set_servo_pulsewidth(Loading_PWM, 1800)
+            sleep(0.5)
+            pi.set_servo_pulsewidth(Loading_PWM, 700)
+            sleep(0.5)
             if i == 3:
                 complete = 1
-                GPIO.output(Loading_PWM, False)
 
-
-class Firing_Sys(Node):
+class FiringSys(Node):
     def __init__(self):
         super().__init__('firing_mechanism')
         self.subscription = self.create_subscription(
-            Int8MultiArray,  # need to setup topic
+            Float32MultiArray,  # need to setup topic
             'com_node',
             self.callback,
             10)
         self.subscription  # prevent unused variable warning
 
     def callback(self, com_array):
-        move_x(com_array.data)
-        move_y(com_array.data)
-        fire(com_array.data)
-        load(com_array.data)
+        global commands
+        commands = com_array.data
+        process_movex.start()
+        process_movey.start()
+        process_fire.start()
+        process_load.start()
+
+class FiringDone(Node):
+    def __init__(self):
+        super().__init__('fire_done')
+        self.publisher_ = self.create_publisher(
+            String,
+            'fire done',
+            10)
+        timer_period = 0.2  # seconds
+        self.timer = self.create_timer(timer_period, self.callback)
+
+    def callback(self):
+        msg = String()
+        msg.data = done
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Done: {done}')
 
 
 def main(args=None):
     print("Actuation initialised\n")
     rclpy.init(args=args)
 
-    firing_sys = Firing_Sys()
-
+    firing_sys = FiringSys()
     rclpy.spin(firing_sys)
 
     firing_sys.destroy_node()
@@ -207,10 +206,55 @@ def main(args=None):
 
 if __name__ == '__main__':
     try:
+        global commands
+        process_movex = Process(target = move_x, args = (commands,))
+        process_movey = Process(target=move_y, args = (commands,))
+        process_fire = Process(target=fire, args = (commands,))
+        process_load = Process(target=load, args = (commands,))
         main()
     except Exception as e:
         print(e)
-        GPIO.cleanup()
-        tilt.stop()
-        loading.stop()
-        motor.stop()
+        pi.stop()
+
+### TRASH ###
+# if 40 seconds have passed, complete  = 1
+# def timer(array):
+#     if array[2] == 1 and complete == 0:
+#         start_time = time.time()
+#         while (time.time() - start_time) < timer_time:
+#             return
+#         complete = 1
+#     return complete\
+
+# def move_y(array):
+#     global complete
+#     angle = 97.2  # from 97.2 to 112.5 degrees
+#     prev_angle = 97.2
+#     duty = angle / 18 + 2.5  # duty cycle
+#
+#     if array[1] == -1:  # decrease angle by 1
+#         if angle > 97:
+#             print("Tilt down\n")
+#             angle -= 1
+#     elif array[1] == 1:  # increase angle by 1
+#         if angle < 113:
+#             print("Tilt up\n")
+#             angle += 1
+#
+#     pi.write(Tilt_PWM, True)  # turn on pwm pin
+#
+#     if prev_angle != angle:  # move servo if there is a change in angle
+#         tilt.ChangeDutyCycle(duty)
+#         sleep(1)
+#
+#     prev_angle = angle  # check whats the prev angle
+#
+#     # if complete, move back to origin
+#     if complete == 1:
+#         print("Firing complete, tilt return to origin\n")
+#         tilt.ChangeDutyCycle(7.9)
+
+        # move_x(com_array.data)
+        # move_y(com_array.data)
+        # fire(com_array.data)
+        # load(com_array.data)
