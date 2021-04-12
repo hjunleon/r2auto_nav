@@ -121,7 +121,7 @@ def move_y(array):
     pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
 
     if complete == 0:
-        pi.pi.set_servo_pulsewidth(Tilt_PWM, pulse)
+        pi.set_servo_pulsewidth(Tilt_PWM, pulse)
         sleep(0.5)
 
     if complete == 1:
