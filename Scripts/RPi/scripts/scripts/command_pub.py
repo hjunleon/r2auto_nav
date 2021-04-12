@@ -75,8 +75,8 @@ def command(coord):
     else:
         command_list[0] = 0.0
 
-    if abs(y_vert_diff) >= angle_thres:
-        command_list[1] = float(y_vert_diff)
+    if abs(y_angle_diff) >= angle_thres:
+        command_list[1] = float(y_angle_diff)
     else:
         command_list[1] = 0.0
 
