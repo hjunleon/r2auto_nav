@@ -9,6 +9,9 @@ class CommandNode(Node):
         self.publisher_ = self.create_publisher(Float32MultiArray, 'com_node', 10)
         self.array = Float32MultiArray()
 
+        delay = 0.2
+        self.timer = self.create_timer(delay, self.readKey())
+
     def readKey(self):
         command = [20.0, 10.0, 1.0]
         try:
@@ -26,6 +29,8 @@ class CommandNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     command_node = CommandNode()
+
+    rclpy.spin(command_node)
 
     command_node.destroy_node()
     rclpy.shutdown()
