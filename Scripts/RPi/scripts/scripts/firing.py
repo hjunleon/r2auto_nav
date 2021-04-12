@@ -62,6 +62,7 @@ def move_x(array):
             pi.write(DIR, cw)
             print("Pan left\n")
             for i in range(int(array[0] // 1.8)):
+                print("turning left")
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
@@ -71,6 +72,7 @@ def move_x(array):
             pi.write(DIR, ccw)
             print("Pan right\n")
             for i in range(int(array[0] // 1.8)):
+                print("turning right")
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
@@ -121,7 +123,7 @@ def move_y(array):
     pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
 
     if complete == 0:
-        pi.set_servo_pulsewidth(Tilt_PWM, pulse)
+        pi.set_servo_pulsewidth(Tilt_PWM, int(pulse))
         sleep(0.5)
 
     if complete == 1:
