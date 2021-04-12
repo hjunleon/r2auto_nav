@@ -48,6 +48,7 @@ pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
 
+
 # com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
 def move_x(array):
     sleep(1)  # pseudo debouncing
@@ -58,12 +59,12 @@ def move_x(array):
     cw = 0  # clockwise
     ccw = 1  # counter clockwise
     delay = 3000 * (10 ** -6)
-    pi.write(STEPPER_EN, 0) #start stepper
+    pi.write(STEPPER_EN, 0)  # start stepper
     if step_limit > yaw > -step_limit and complete == 0:
         if array[0] < 0:
             pi.write(DIR, cw)
             print("Pan left\n")
-            for i in range(int(array[0] // 1.8)*teeth_scale):
+            for i in range(int(array[0] // 1.8) * teeth_scale):
                 print("turning left")
                 pi.write(STEP, 1)
                 sleep(delay)
@@ -73,7 +74,7 @@ def move_x(array):
         elif array[0] > 0:
             pi.write(DIR, ccw)
             print("Pan right\n")
-            for i in range(int(array[0] // 1.8)*teeth_scale):
+            for i in range(int(array[0] // 1.8) * teeth_scale):
                 print("turning right")
                 pi.write(STEP, 1)
                 sleep(delay)
@@ -200,6 +201,7 @@ class FiringSys(Node):
         fire(com_array.data)
         load(com_array.data)
 
+
 def main(args=None):
     print("Actuation initialised\n")
     rclpy.init(args=args)
@@ -280,5 +282,5 @@ if __name__ == '__main__':
 #         self.get_logger().info(f'Done: {done}')
 
 # timer_period = 0.2  # seconds
-        # self.timer_x = self.create_timer(timer_period, self.callback_x)
-        # self.timer_y = self.create_timer(timer_period, self.callback_y)
+# self.timer_x = self.create_timer(timer_period, self.callback_x)
+# self.timer_y = self.create_timer(timer_period, self.callback_y)
