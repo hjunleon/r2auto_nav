@@ -16,7 +16,6 @@ from std_msgs.msg import Float32MultiArray, String
 # from std_msgs.msg import String
 from time import sleep
 import pigpio
-from multiprocessing import Process
 
 # pins based on BCM
 DIR = 22  # direction GPIO pin
@@ -48,14 +47,10 @@ pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
 
-#initialisation of threads
-commands = [0.0, 0.0, 0.0]
-
 # com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
 def move_x(array):
     sleep(1)  # pseudo debouncing
 
-    global complete, done
     step_limit = 200  # max number of steps
     yaw = 0  # keep track of relative position of top layer\
     cw = 0  # clockwise
@@ -122,7 +117,6 @@ def move_x(array):
 def move_y(array):
     sleep(1)  # pseudo debouncing
 
-    global complete
     flat_angle = 1850
     pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
 
@@ -167,33 +161,44 @@ def load(array):
 class FiringSys(Node):
     def __init__(self):
         super().__init__('firing_mechanism')
+        # sub 1 for x axis
         self.subscription = self.create_subscription(
-            Float32MultiArray,  # need to setup topic
-            'com_node',
-            self.callback,
+            Float32MultiArray,  # topic
+            'com_node_x',
+            self.callback_x,
             10)
         self.subscription  # prevent unused variable warning
 
+        # sub 2 for y_axis, fire and load
+        self.subscription_ = self.create_subscription(
+            Float32MultiArray,  # topic
+            'com_node_y',
+            self.callback_y,
+            10)
+        self.subscription_  # prevent unused variable warning
+
+        # pub for completed actuation
         self.publisher_ = self.create_publisher(
             String,
             'fire_done',
             10)
 
         timer_period = 0.2  # seconds
-        self.timer = self.create_timer(timer_period, self.callback)
+        self.timer_x = self.create_timer(timer_period, self.callback_x)
+        self.timer_y = self.create_timer(timer_period, self.callback_y)
 
-    def callback(self, com_array):
-        global commands
-        commands = com_array.data
-        process_movex.start()
-        process_movey.start()
-        process_fire.start()
-        process_load.start()
+    def callback_x(self, com_array):
+        move_x(com_array.data)
 
         msg = String()
         msg.data = done
         self.publisher_.publish(msg)
         self.get_logger().info(f'Done: {done}')
+
+    def callback_y(self, com_array):
+        move_y(com_array.data)
+        fire(com_array.data)
+        load(com_array.data)
 
 def main(args=None):
     print("Actuation initialised\n")
@@ -207,11 +212,6 @@ def main(args=None):
 
 
 if __name__ == '__main__':
-    process_movex = Process(target=move_x, args=(commands,))
-    print("i made it to initialisation")
-    process_movey = Process(target=move_y, args=(commands,))
-    process_fire = Process(target=fire, args=(commands,))
-    process_load = Process(target=load, args=(commands,))
     try:
         main()
     except Exception as e:
