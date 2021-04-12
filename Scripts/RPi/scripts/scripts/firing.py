@@ -10,7 +10,6 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, String
 
-# from std_msgs.msg import String
 from time import sleep
 import pigpio
 
@@ -50,23 +49,23 @@ class FiringSys(Node):
         self.yaw = 0  # keep track of relative position of top layer
 
         # sub 1 for x axis
-        self.subscription = self.create_subscription(
+        self.sub1 = self.create_subscription(
             Float32MultiArray,  # topic
             'com_node',
             self.callback_x,
             1)
-        self.subscription  # prevent unused variable warning
+        self.sub1  # prevent unused variable warning
 
         # sub 2 for y_axis, fire and load
-        self.subscription_ = self.create_subscription(
+        self.sub2 = self.create_subscription(
             Float32MultiArray,  # topic
             'com_node',
             self.callback_y,
             1)
-        self.subscription_  # prevent unused variable warning
+        self.sub2  # prevent unused variable warning
 
         # pub for completed actuation
-        self.publisher_ = self.create_publisher(
+        self.pub = self.create_publisher(
             String,
             'fire_done',
             10)
@@ -76,11 +75,10 @@ class FiringSys(Node):
         print(f"Complete: {self.complete}")
         msg = String()
         msg.data = self.done
-        self.publisher_.publish(msg)
+        self.pub.publish(msg)
         self.get_logger().info(f'Done: {self.done}')
 
     def callback_y(self, com_array):
-
         self.move_y(com_array.data)
         self.fire(com_array.data)
         self.load(com_array.data)
@@ -102,22 +100,28 @@ class FiringSys(Node):
                 pi.write(DIR, cw)
                 print("Pan left\n")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
-                    # print("turning left")
-                    pi.write(STEP, 1)
-                    sleep(delay)
-                    pi.write(STEP, 0)
-                    sleep(delay)
-                    self.yaw -= 1
+                    # check if will exceed limit, allows for more precision
+                    if step_limit > self.yaw > -step_limit:
+                        pi.write(STEP, 1)
+                        sleep(delay)
+                        pi.write(STEP, 0)
+                        sleep(delay)
+                        self.yaw -= 1
+                    else:
+                        continue
             elif array[0] > 0:
                 pi.write(DIR, ccw)
                 print("Pan right\n")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
-                    # print("turning right")
-                    pi.write(STEP, 1)
-                    sleep(delay)
-                    pi.write(STEP, 0)
-                    sleep(delay)
-                    self.yaw += 1
+                    # check if will exceed limit, allows for more precision
+                    if step_limit > self.yaw > -step_limit:
+                        pi.write(STEP, 1)
+                        sleep(delay)
+                        pi.write(STEP, 0)
+                        sleep(delay)
+                        self.yaw += 1
+                    else:
+                        continue
             print(f"Yaw: {self.yaw}")
 
         # in case yaw exceeds recommended range
@@ -182,9 +186,9 @@ class FiringSys(Node):
         if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.complete == 0:  # 1 for target found
             cur_pulse = pi.get_servo_pulsewidth(Tilt_PWM)
             print(f"cur pulse: {cur_pulse}")
-            pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)
             pi.write(M1, 1)
             pi.set_PWM_dutycycle(M_PWM, 180)  # motor on
+            pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse) # force servo up
 
         if self.complete == 1:
             print("Firing complete, motors whining down\n")
@@ -193,8 +197,6 @@ class FiringSys(Node):
 
     # loading of balls using servo motor
     def load(self, array):
-        # needs to be stopping at ball at neutral(?)<---confirm this with rest
-        # servo arm goes back and moves forward in a certain timing range to push balls forward
         if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.complete == 0:
             for i in range(4):
                 print("Loading ball\n")
@@ -225,70 +227,3 @@ if __name__ == '__main__':
         pi.stop()
     finally:
         pi.stop()
-
-### TRASH ###
-# if 40 seconds have passed, self.complete  = 1
-# def timer(array):
-#     if array[2] == 1 and self.complete == 0:
-#         start_time = time.time()
-#         while (time.time() - start_time) < timer_time:
-#             return
-#         self.complete = 1
-#     return self.complete\
-
-# def move_y(array):
-#     global self.complete
-#     angle = 97.2  # from 97.2 to 112.5 degrees
-#     prev_angle = 97.2
-#     duty = angle / 18 + 2.5  # duty cycle
-#
-#     if array[1] == -1:  # decrease angle by 1
-#         if angle > 97:
-#             print("Tilt down\n")
-#             angle -= 1
-#     elif array[1] == 1:  # increase angle by 1
-#         if angle < 113:
-#             print("Tilt up\n")
-#             angle += 1
-#
-#     pi.write(Tilt_PWM, True)  # turn on pwm pin
-#
-#     if prev_angle != angle:  # move servo if there is a change in angle
-#         tilt.ChangeDutyCycle(duty)
-#         sleep(1)
-#
-#     prev_angle = angle  # check whats the prev angle
-#
-#     # if self.complete, move back to origin
-#     if self.complete == 1:
-#         print("Firing self.complete, tilt return to origin\n")
-#         tilt.ChangeDutyCycle(7.9)
-
-# move_x(com_array.data)
-# move_y(com_array.data)
-# fire(com_array.data)
-# load(com_array.data)
-
-# class FiringDone(Node):
-#     def __init__(self):
-#         super().__init__('fire_done')
-#         self.publisher_ = self.create_publisher(
-#             String,
-#             'fire done',
-#             10)
-#         timer_period = 0.2  # seconds
-#         self.timer = self.create_timer(timer_period, self.callback)
-#
-#     def callback(self):
-#         msg = String()
-#         msg.data = done
-#         self.publisher_.publish(msg)
-#         self.get_logger().info(f'Done: {done}')
-
-# timer_period = 0.2  # seconds
-# self.timer_x = self.create_timer(timer_period, self.callback_x)
-# self.timer_y = self.create_timer(timer_period, self.callback_y)
-
-# # global constants
-# self.complete = 0  # turns to 1 when firing is self.complete, controlled by loading of balls
-# done = 'not done'  # turns to 1 when actuation is reset
