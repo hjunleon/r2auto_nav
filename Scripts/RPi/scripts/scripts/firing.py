@@ -50,12 +50,6 @@ pi.write(STEPPER_EN, 1)
 
 #initialisation of threads
 commands = [0.0, 0.0, 0.0]
-process_movex = Process(target=move_x, args=(commands,))
-print("i made it to initialisation")
-process_movey = Process(target=move_y, args=(commands,))
-process_fire = Process(target=fire, args=(commands,))
-process_load = Process(target=load, args=(commands,))
-
 
 # com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
 def move_x(array):
@@ -213,6 +207,11 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+    process_movex = Process(target=move_x, args=(commands,))
+    print("i made it to initialisation")
+    process_movey = Process(target=move_y, args=(commands,))
+    process_fire = Process(target=fire, args=(commands,))
+    process_load = Process(target=load, args=(commands,))
     try:
         main()
     except Exception as e:
