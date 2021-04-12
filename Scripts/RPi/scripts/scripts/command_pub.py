@@ -16,9 +16,10 @@ import numpy as np
 
 # temperature threshold
 temp_thres = 30
-angle_thres = 5
+h_angle_limit = 21.8 # at 100cm away, horizontal view is 40cm
+v_angle_limit = 26.6 # at 100cm away, vertical view is 50cm
 resolution = 64
-edge_angle = 20
+angle_thres = 5
 
 
 class CommandNode(Node):
@@ -66,16 +67,16 @@ def command(coord):
     # 1 == right, up
 
     command_list = [0, 0, coord[2]]
-    x_hori_diff, y_hori_diff = coord[0] - (resolution // 2), coord[1] - (resolution // 2)
-    x_angle_diff, y_hori_diff = edge_angle * (x_hori_diff / (resolution // 2)), edge_angle * (y_hori_diff / (resolution // 2))
+    x_hori_diff, y_vert_diff = coord[0] - (resolution // 2), coord[1] - (resolution // 2)
+    x_angle_diff, y_angle_diff = h_angle_limit * (x_hori_diff / (resolution // 2)), v_angle_limit * (y_vert_diff / (resolution // 2))
 
     if abs(x_angle_diff) >= angle_thres:
         command_list[0] = x_angle_diff
     else:
         command_list[0] = 0
 
-    if y_hori_diff >= angle_thres:
-        command_list[1] = y_hori_diff
+    if abs(y_vert_diff) >= angle_thres:
+        command_list[1] = y_vert_diff
     else:
         command_list[1] = 0
 
