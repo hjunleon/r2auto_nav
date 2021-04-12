@@ -55,7 +55,7 @@ def move_x(array):
     yaw = 0  # keep track of relative position of top layer\
     cw = 0  # clockwise
     ccw = 1  # counter clockwise
-    delay = 0.005 / 32
+    delay = 3000 * (10 ** -6)
     pi.write(STEPPER_EN, 0)
     if yaw < step_limit and complete == 0:
         if array[0] < 0:
