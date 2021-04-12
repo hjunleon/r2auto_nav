@@ -28,7 +28,7 @@ M_PWM = 13  # bottom firing motor pin 2
 
 # global constants
 complete = 0  # turns to 1 when firing is complete, controlled by a timer
-done = 0  # turns to 1 when actuation is reset
+done = 'not done'  # turns to 1 when actuation is reset
 
 # setting up pins
 pi = pigpio.pi()
@@ -111,7 +111,7 @@ def move_x(array):
     # turn off stepper
     if yaw == 0 and complete == 1:
         pi.write(STEPPER_EN, 1)
-        done = 1
+        done = 'done'
 
 
 def move_y(array):
