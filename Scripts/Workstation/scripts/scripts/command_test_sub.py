@@ -11,7 +11,7 @@ Copy from r2auto_nav/Target Detection/command_test_sub.py in git
 # ROS imports
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray
+from std_msgs.msg import Float32MultiArray
 import numpy as np
 
 
@@ -19,7 +19,7 @@ class CommandSub(Node):
 
     def __init__(self):
         super().__init__('com_sub')
-        self.heat_subscription = self.create_subscription(Int8MultiArray, 'com_node', self.callback, 10)
+        self.heat_subscription = self.create_subscription(Float32MultiArray, 'com_node', self.callback, 10)
         self.heat_subscription
 
     def callback(self, comm_array):
