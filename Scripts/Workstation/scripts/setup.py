@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'plotter = scripts.plotting_sub:main',
             'command_sub = scripts.command_test_sub:main',
+            'command_test_pub = scripts.command_test_pub:main',
         ],
     },
 )

@@ -15,10 +15,7 @@ from std_msgs.msg import Int8MultiArray
 
 # from std_msgs.msg import String
 from time import sleep
-import RPi.GPIO as GPIO
-
-# turn off warnings
-GPIO.setwarnings(False)
+import pigpio
 
 # pins based on BCM
 DIR = 22  # direction GPIO pin
@@ -35,22 +32,23 @@ complete = 0  # turns to 1 when firing is complete, controlled by a timer
 
 
 # setting up pins
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(DIR, GPIO.OUT)
-GPIO.setup(STEP, GPIO.OUT)
-GPIO.setup(STEPPER_EN, GPIO.OUT)
-GPIO.setup(Tilt_PWM, GPIO.OUT)
-GPIO.setup(Loading_PWM, GPIO.OUT)
-GPIO.setup(M1, GPIO.OUT)
-GPIO.setup(M_PWM, GPIO.OUT)
+pi = pigpio.pi()
+pi.set_mode(DIR, pigpio.OUTPUT)
+pi.set_mode(STEP, pigpio.OUTPUT)
+pi.set_mode(STEPPER_EN, pigpio.OUTPUT)
+pi.set_mode(Tilt_PWM, pigpio.OUTPUT)
+pi.set_mode(Loading_PWM, pigpio.OUTPUT)
+pi.set_mode(M1, pigpio.OUTPUT)
+pi.set_mode(M_PWM, pigpio.OUTPUT)
 
 # max rpi pwm frequency is 8khz
-tilt = GPIO.PWM(Tilt_PWM, 50)  # servo pwm pin at 50hz
-loading = GPIO.PWM(Loading_PWM, 50)  # firing motors pwm pin at 1000 hz
-motor = GPIO.PWM(M_PWM, 1000)  # motor pwm at 1000 hz
-tilt.start(7.9)
-loading.start(8.75)
-motor.start(0)
+# servo pwm pin at 50hz
+# firing motors pwm pin at 1000 hz
+pi.set_PWM_frequency(M_PWM, 1000)  # motor pwm at 1000 hz
+pi.set_servo_pulsewidth(Tilt_PWM, 1650) # upwards: 1650, flat: 1840
+pi.set_servo_pulsewidth(Loading_PWM, 700) # forward: 700, backwards: 1800
+pi.set_PWM_dutycycle(M_PWM, 0)
+pi.write(STEPPER_EN, 1)
 
 
 # com_array = [0,0] #x and y coordinate
@@ -59,15 +57,15 @@ def move_x(array):
     CW = 0  # clockwise
     CCW = 1  # counter clockwise
     delay = 0.005 / 32
-    GPIO.output(STEPPER_EN, GPIO.LOW)
+    pi.write(STEPPER_EN, 0)
     if yaw < 200:
         if array[0] == -1:
-            GPIO.output(DIR, CW)
+            pi.write(DIR, CW)
             print("Pan left\n")
             for i in range(2):
-                GPIO.output(STEP, GPIO.HIGH)
+                pi.write(STEP, 1)
                 sleep(delay)
-                GPIO.output(STEP, GPIO.LOW)
+                pi.write(STEP, 0)
                 sleep(delay)
                 yaw -= 1
         elif array[0] == 1:

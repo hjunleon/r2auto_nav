@@ -15,9 +15,11 @@ from std_msgs.msg import Int8MultiArray, Float64MultiArray
 import numpy as np
 
 # temperature threshold
-temp_thres = 20
-radius_thres = 5
+temp_thres = 30
+h_angle_limit = 21.8 # at 100cm away, horizontal view is 40cm
+v_angle_limit = 26.6 # at 100cm away, vertical view is 50cm
 resolution = 64
+angle_thres = 5
 
 
 class CommandNode(Node):
@@ -65,21 +67,16 @@ def command(coord):
     # 1 == right, up
 
     command_list = [0, 0, coord[2]]
-    xdiff, ydiff = abs(coord[0] - resolution), abs(coord[1] - resolution)
+    x_hori_diff, y_vert_diff = coord[0] - (resolution // 2), coord[1] - (resolution // 2)
+    x_angle_diff, y_angle_diff = h_angle_limit * (x_hori_diff / (resolution // 2)), v_angle_limit * (y_vert_diff / (resolution // 2))
 
-    if xdiff >= radius_thres:
-        if coord[0] < resolution // 2:
-            command_list[0] = -1
-        elif coord[0] > resolution // 2:
-            command_list[0] = 1
+    if abs(x_angle_diff) >= angle_thres:
+        command_list[0] = x_angle_diff
     else:
         command_list[0] = 0
 
-    if ydiff >= radius_thres:
-        if coord[1] < resolution // 2:
-            command_list[1] = -1
-        elif coord[1] > resolution // 2:
-            command_list[1] = 1
+    if abs(y_vert_diff) >= angle_thres:
+        command_list[1] = y_vert_diff
     else:
         command_list[1] = 0
 
