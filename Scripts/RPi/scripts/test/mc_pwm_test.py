@@ -1,25 +1,24 @@
 from time import sleep
 import RPi.GPIO as GPIO
+import pigpio as pig
 
 M1 = 26
 PWM = 13
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(M1, GPIO.OUT)
-GPIO.setup(PWM, GPIO.OUT)
+motor = pig.pi()
+motor.set_mode(M1, pig.OUTPUT)
+motor.set_mode(PWM, pig.OUTPUT)
 
-speed = GPIO.PWM(PWM, 1000) #motor pwm at 1000 hz
-speed.start(0)
+motor.set_PWM_dutycycle(13, 0) # motor off, 0 - 255
 
+def fire(begin):
+    if begin == 'y':
+        motor.write(M1, 1)
+        motor.set_PWM_dutycycle(13, 64) # motor on
 
-def fire(start):
-    if start == 'y':
-        GPIO.output(M1, GPIO.HIGH)
-        speed.ChangeDutyCycle(50)
-
-    elif start == 'n':
-        GPIO.output(M1, GPIO.LOW)
-        speed.ChangeDutyCycle(0)
+    elif begin == 'n':
+        motor.write(M1, 0)
+        motor.set_PWM_dutycycle(13, 0) # motor off
 
 
 try:
@@ -29,8 +28,10 @@ try:
         sleep(1)
 except Exception as e:
     print(e)
-    GPIO.output(M1, GPIO.LOW)
-    GPIO.cleanup()
+    motor.write(M1, 0)
+    motor.set_PWM_dutycycle(13, 0)
+    motor.stop()
 finally:
-    GPIO.output(M1, GPIO.LOW)
-    GPIO.cleanup()
+    motor.write(M1, 0)
+    motor.set_PWM_dutycycle(13, 0)
+    motor.stop()
