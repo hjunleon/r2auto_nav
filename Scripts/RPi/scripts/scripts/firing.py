@@ -156,6 +156,7 @@ def load(array):
             pi.set_servo_pulsewidth(Loading_PWM, 700)
             sleep(0.5)
             if i == 3:
+                global complete
                 complete = 1
 
 
