@@ -13,10 +13,13 @@ class CommandNode(Node):
         self.timer = self.create_timer(delay, self.readKey())
 
     def readKey(self):
-        self.array.data = [20.0, 10.0, 1.0]
         try:
             while True:
-                _ = input('Test: [20.0, 10.0, 1.0]\nEnter to continue...')
+                status = input('Test: [20.0, 10.0, 1.0]\n0 or 1::')
+                if int(status) == 1:
+                    self.array.data = [20.0, 10.0, 1.0]
+                elif int(status) == 0:
+                    self.array.data = [0.0, 0.0, 1.0]
                 self.publisher_.publish(self.array)
         except Exception as e:
             print(e)
