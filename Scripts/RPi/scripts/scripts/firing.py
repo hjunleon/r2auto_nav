@@ -51,17 +51,18 @@ pi.write(STEPPER_EN, 1)
 def move_x(array):
     sleep(1)  # pseudo debouncing
 
-    step_limit = 200  # max number of steps
+    step_limit = 100  # max number of steps
+    teeth_scale = 2
     yaw = 0  # keep track of relative position of top layer\
     cw = 0  # clockwise
     ccw = 1  # counter clockwise
     delay = 3000 * (10 ** -6)
     pi.write(STEPPER_EN, 0)
-    if yaw < step_limit and complete == 0:
+    if step_limit > yaw > -step_limit and complete == 0:
         if array[0] < 0:
             pi.write(DIR, cw)
             print("Pan left\n")
-            for i in range(int(array[0] // 1.8)):
+            for i in range(int(array[0] // 1.8)*teeth_scale):
                 print("turning left")
                 pi.write(STEP, 1)
                 sleep(delay)
@@ -71,7 +72,7 @@ def move_x(array):
         elif array[0] > 0:
             pi.write(DIR, ccw)
             print("Pan right\n")
-            for i in range(int(array[0] // 1.8)):
+            for i in range(int(array[0] // 1.8)*teeth_scale):
                 print("turning right")
                 pi.write(STEP, 1)
                 sleep(delay)
@@ -79,7 +80,7 @@ def move_x(array):
                 sleep(delay)
                 yaw += 1
     # in case yaw exceeds recommended range
-    elif yaw > step_limit and complete == 0:
+    elif -step_limit > yaw > step_limit and complete == 0:
         print("Exceeded pan range, returning to origin\n")
         while yaw != 0:
             # barrel on the right
