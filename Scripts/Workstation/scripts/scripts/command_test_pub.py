@@ -1,13 +1,13 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int8MultiArray
+from std_msgs.msg import Float32MultiArray
 
 class CommandNode(Node):
 
     def __init__(self):
         super().__init__('com_node')
         self.publisher_ = self.create_publisher(Int8MultiArray, 'com_node', 10)
-        self.array = Int8MultiArray()
+        self.array = Float32MultiArray()
 
     def readKey(self):
         command = [20.0, 10.0, 1.0]
