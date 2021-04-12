@@ -6,9 +6,6 @@
 # https://docs.ros.org/en/foxy/Tutorials/Writing-A-Simple-Py-Publisher-And-Subscriber.html
 # https://www.instructables.com/Servo-Motor-Control-With-Raspberry-Pi/
 
-# to add
-# GPIO.cleanup, pwm.stop(), to do this, need to check if the balls have been fired
-# create timer to tell when shooting has stopped from first retrieval of target detection
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, String
