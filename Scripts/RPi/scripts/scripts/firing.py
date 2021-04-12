@@ -40,12 +40,13 @@ pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
 
+
 class FiringSys(Node):
     def __init__(self):
         super().__init__('firing_mechanism')
         # constants to mark completion
-        self.complete = 0 #firing complete
-        self.done = 'not done' #firing complete AND returned to origin
+        self.complete = 0  # firing complete
+        self.done = 'not done'  # firing complete AND returned to origin
 
         # sub 1 for x axis
         self.subscription = self.create_subscription(
@@ -70,17 +71,17 @@ class FiringSys(Node):
             10)
 
     def callback_x(self, com_array):
-        move_x(com_array.data)
+        self.move_x(com_array.data)
 
         msg = String()
-        msg.data = done
+        msg.data = self.done
         self.publisher_.publish(msg)
-        self.get_logger().info(f'Done: {done}')
+        self.get_logger().info(f'Done: {self.done}')
 
     def callback_y(self, com_array):
-        move_y(com_array.data)
-        fire(com_array.data)
-        load(com_array.data)
+        self.move_y(com_array.data)
+        self.fire(com_array.data)
+        self.load(com_array.data)
 
     # com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
     def move_x(self, array):
@@ -192,6 +193,7 @@ class FiringSys(Node):
                 if i == 3:
                     self.complete = 1
 
+
 def main(args=None):
     print("Actuation initialised\n")
     rclpy.init(args=args)
@@ -272,8 +274,8 @@ if __name__ == '__main__':
 #         self.get_logger().info(f'Done: {done}')
 
 # timer_period = 0.2  # seconds
-        # self.timer_x = self.create_timer(timer_period, self.callback_x)
-        # self.timer_y = self.create_timer(timer_period, self.callback_y)
+# self.timer_x = self.create_timer(timer_period, self.callback_x)
+# self.timer_y = self.create_timer(timer_period, self.callback_y)
 
 # # global constants
 # self.complete = 0  # turns to 1 when firing is self.complete, controlled by loading of balls
