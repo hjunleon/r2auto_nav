@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr  4 12:28:28 2021
+
+@author: facestomperx
+"""
+
+class trajectoryScorer():
+    def __init__(self, cost_funcs, max_samples):
+        self.cost_funcs = cost_funcs
+        self.max_samples = max_samples
