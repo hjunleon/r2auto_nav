@@ -155,7 +155,7 @@ class FiringSys(Node):
                 if self.yaw > 0:
                     self.yaw -= 1
                 elif self.yaw < 0:
-                    self. += 1
+                    self.yaw += 1
                 print(f"Yaw @ origin: {self.yaw}")
 
         # turn off stepper
