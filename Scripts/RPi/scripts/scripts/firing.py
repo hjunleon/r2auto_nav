@@ -213,6 +213,7 @@ if __name__ == '__main__':
     try:
         global commands
         process_movex = Process(target=move_x, args=(commands,))
+        print("i made it to initialisation")
         process_movey = Process(target=move_y, args=(commands,))
         process_fire = Process(target=fire, args=(commands,))
         process_load = Process(target=load, args=(commands,))
