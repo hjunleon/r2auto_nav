@@ -54,7 +54,7 @@ class FiringSys(Node):
             Float32MultiArray,  # topic
             'com_node',
             self.callback_x,
-            10)
+            1)
         self.subscription  # prevent unused variable warning
 
         # sub 2 for y_axis, fire and load
@@ -62,7 +62,7 @@ class FiringSys(Node):
             Float32MultiArray,  # topic
             'com_node',
             self.callback_y,
-            10)
+            1)
         self.subscription_  # prevent unused variable warning
 
         # pub for completed actuation
