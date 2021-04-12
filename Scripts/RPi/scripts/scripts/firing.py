@@ -21,7 +21,7 @@ from multiprocessing import Process
 # pins based on BCM
 DIR = 22  # direction GPIO pin
 STEP = 27  # step GPIO pin
-STEPPER_EN = 6 # stepper motor enable pin
+STEPPER_EN = 6  # stepper motor enable pin
 Tilt_PWM = 18  # servo pwm pin
 Loading_PWM = 12  # Loading servo pwm pin
 M1 = 26  # firing motors pin
@@ -29,7 +29,7 @@ M_PWM = 13  # bottom firing motor pin 2
 
 # global constants
 complete = 0  # turns to 1 when firing is complete, controlled by a timer
-done = 0 #turns to 1 when actuation is reset
+done = 0  # turns to 1 when actuation is reset
 
 # setting up pins
 pi = pigpio.pi()
@@ -43,17 +43,18 @@ pi.set_mode(M_PWM, pigpio.OUTPUT)
 
 # setting up PWM
 pi.set_PWM_frequency(M_PWM, 1000)  # motor pwm at 1000 hz
-pi.set_servo_pulsewidth(Tilt_PWM, 1650) # upwards: 1650, flat: 1840
-pi.set_servo_pulsewidth(Loading_PWM, 700) # forward: 700, backwards: 1800
+pi.set_servo_pulsewidth(Tilt_PWM, 1650)  # upwards: 1650, flat: 1840
+pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
 
+
 # com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
 def move_x(array):
-    sleep(1) # pseudo debouncing
+    sleep(1)  # pseudo debouncing
 
     global complete, done
-    step_limit = 200 # max number of steps
+    step_limit = 200  # max number of steps
     yaw = 0  # keep track of relative position of top layer\
     cw = 0  # clockwise
     ccw = 1  # counter clockwise
@@ -110,17 +111,18 @@ def move_x(array):
             pi.write(STEP, 0)
             sleep(delay)
 
-    #turn off stepper
+    # turn off stepper
     if yaw == 0 and complete == 1:
         pi.write(STEPPER_EN, 1)
         done = 1
+
 
 def move_y(array):
     sleep(1)  # pseudo debouncing
 
     global complete
     flat_angle = 1850
-    pulse = flat_angle - 10*(array[1]) #formula to translate angle to pulse width
+    pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
 
     if complete == 0:
         pi.pi.set_servo_pulsewidth(Tilt_PWM, pulse)
@@ -130,17 +132,19 @@ def move_y(array):
         pi.set_servo_pulsewidth(Tilt_PWM, flat_angle)
         sleep(0.5)
 
+
 # power on dc motors when target is sighted, stop powering when target has been shot
 def fire(array):
     global complete
     if array[0] == 0 and array[1] == 0 and array[2] == 1 and complete == 0:  # 1 for target found
         pi.write(M1, 1)
-        pi.set_PWM_dutycycle(13, 180) # motor on
+        pi.set_PWM_dutycycle(13, 180)  # motor on
 
     if complete == 1:
         print("Firing complete, motors whining down\n")
         pi.write(M1, 0)
-        pi.set_PWM_dutycycle(13, 0) # motor off
+        pi.set_PWM_dutycycle(13, 0)  # motor off
+
 
 # loading of balls using servo motor
 def load(array):
@@ -156,6 +160,7 @@ def load(array):
             sleep(0.5)
             if i == 3:
                 complete = 1
+
 
 class FiringSys(Node):
     def __init__(self):
@@ -174,6 +179,7 @@ class FiringSys(Node):
         process_movey.start()
         process_fire.start()
         process_load.start()
+
 
 class FiringDone(Node):
     def __init__(self):
@@ -203,14 +209,13 @@ def main(args=None):
     rclpy.shutdown()
 
 
-
 if __name__ == '__main__':
     try:
         global commands
-        process_movex = Process(target = move_x, args = (commands,))
-        process_movey = Process(target=move_y, args = (commands,))
-        process_fire = Process(target=fire, args = (commands,))
-        process_load = Process(target=load, args = (commands,))
+        process_movex = Process(target=move_x, args=(commands,))
+        process_movey = Process(target=move_y, args=(commands,))
+        process_fire = Process(target=fire, args=(commands,))
+        process_load = Process(target=load, args=(commands,))
         main()
     except Exception as e:
         print(e)
@@ -254,7 +259,7 @@ if __name__ == '__main__':
 #         print("Firing complete, tilt return to origin\n")
 #         tilt.ChangeDutyCycle(7.9)
 
-        # move_x(com_array.data)
-        # move_y(com_array.data)
-        # fire(com_array.data)
-        # load(com_array.data)
+# move_x(com_array.data)
+# move_y(com_array.data)
+# fire(com_array.data)
+# load(com_array.data)
