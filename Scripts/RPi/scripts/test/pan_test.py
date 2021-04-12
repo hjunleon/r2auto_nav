@@ -3,7 +3,7 @@
 # Description: Testing pan mechanism of turret
 
 from time import sleep
-import RPi.GPIO as GPIO
+import pigpio
 
 EN = 6
 DIR = 22  # direction GPIO pin
@@ -15,25 +15,29 @@ CW = 1  # clockwise
 CCW = 0  # counter clockwise
 yaw = 0  # keep track of relative position of top layer
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(DIR, GPIO.OUT)
-GPIO.setup(STEP, GPIO.OUT)
-GPIO.setup(EN, GPIO.OUT)
-GPIO.output(EN, GPIO.LOW)
+pi = pigpio.pi()
+pi.set_mode(DIR, pigpio.OUTPUT)
+pi.set_mode(STEP, pigpio.OUTPUT)
+pi.set_mode(EN, pigpio.OUTPUT)
+
 
 def pan(direction):
     # direction of pan
     if direction.lower() == "l":
-        GPIO.output(DIR, CW)
+        pi.write(DIR, CW)
     elif direction.lower() == "r":
-        GPIO.output(DIR, CCW)
+        pi.write(DIR, CCW)
+
+    pi.write(EN, 0)
 
     # stepper moves one rotation
     for i in range(step - 1):
-        GPIO.output(STEP, GPIO.HIGH)
+        pi.write(STEP, 1)
         sleep(delay)
-        GPIO.output(STEP, GPIO.LOW)
+        pi.write(STEP, 0)
         sleep(delay)
+
+    pi.write(EN, 1)
 
 
 try:
@@ -42,11 +46,10 @@ try:
         pan(direction)
         sleep(delay)
 except Exception as e:
-    GPIO.output(EN, GPIO.HIGH)
     print(e)
-    GPIO.cleanup()
+    pi.stop()
 
 finally:
-    GPIO.output(EN, GPIO.HIGH)
-    GPIO.cleanup()
+    pi.write(EN, 1)
+    pi.stop()
 
