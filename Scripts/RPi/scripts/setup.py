@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'thermal_test = scripts.thermal_test:main',
-            'thermal_interpolate = scripts.thermal_interpolate:main',
+            'thermal = scripts.thermal_test:main',
+            'thermal_i = scripts.thermal_interpolate:main',
             'command_pub = scripts.command_pub:main',
             'actuation = scripts.firing:main',
         ],
