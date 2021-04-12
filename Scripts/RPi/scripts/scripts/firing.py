@@ -48,6 +48,14 @@ pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
 
+#initialisation of threads
+commands = [0.0, 0.0, 0.0]
+process_movex = Process(target=move_x, args=(commands,))
+print("i made it to initialisation")
+process_movey = Process(target=move_y, args=(commands,))
+process_fire = Process(target=fire, args=(commands,))
+process_load = Process(target=load, args=(commands,))
+
 
 # com_array = [0,0] #x and y coordinate, negative: left, down, positive: right, up
 def move_x(array):
@@ -172,6 +180,14 @@ class FiringSys(Node):
             10)
         self.subscription  # prevent unused variable warning
 
+        self.publisher_ = self.create_publisher(
+            String,
+            'fire_done',
+            10)
+
+        timer_period = 0.2  # seconds
+        self.timer = self.create_timer(timer_period, self.callback)
+
     def callback(self, com_array):
         global commands
         commands = com_array.data
@@ -180,23 +196,10 @@ class FiringSys(Node):
         process_fire.start()
         process_load.start()
 
-
-class FiringDone(Node):
-    def __init__(self):
-        super().__init__('fire_done')
-        self.publisher_ = self.create_publisher(
-            String,
-            'fire done',
-            10)
-        timer_period = 0.2  # seconds
-        self.timer = self.create_timer(timer_period, self.callback)
-
-    def callback(self):
         msg = String()
         msg.data = done
         self.publisher_.publish(msg)
         self.get_logger().info(f'Done: {done}')
-
 
 def main(args=None):
     print("Actuation initialised\n")
@@ -211,12 +214,6 @@ def main(args=None):
 
 if __name__ == '__main__':
     try:
-        global commands
-        process_movex = Process(target=move_x, args=(commands,))
-        print("i made it to initialisation")
-        process_movey = Process(target=move_y, args=(commands,))
-        process_fire = Process(target=fire, args=(commands,))
-        process_load = Process(target=load, args=(commands,))
         main()
     except Exception as e:
         print(e)
@@ -264,3 +261,19 @@ if __name__ == '__main__':
 # move_y(com_array.data)
 # fire(com_array.data)
 # load(com_array.data)
+
+# class FiringDone(Node):
+#     def __init__(self):
+#         super().__init__('fire_done')
+#         self.publisher_ = self.create_publisher(
+#             String,
+#             'fire done',
+#             10)
+#         timer_period = 0.2  # seconds
+#         self.timer = self.create_timer(timer_period, self.callback)
+#
+#     def callback(self):
+#         msg = String()
+#         msg.data = done
+#         self.publisher_.publish(msg)
+#         self.get_logger().info(f'Done: {done}')
