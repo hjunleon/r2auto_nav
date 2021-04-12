@@ -47,6 +47,7 @@ class FiringSys(Node):
         # constants to mark completion
         self.complete = 0  # firing complete
         self.done = 'not done'  # firing complete AND returned to origin
+        self.yaw = 0  # keep track of relative position of top layer
 
         # sub 1 for x axis
         self.subscription = self.create_subscription(
@@ -90,11 +91,12 @@ class FiringSys(Node):
 
         step_limit = 100  # max number of steps
         teeth_scale = 2
-        yaw = 0  # keep track of relative position of top layer\
         cw = 0  # clockwise
         ccw = 1  # counter clockwise
         delay = 3000 * (10 ** -6)
+
         pi.write(STEPPER_EN, 0)  # start stepper
+
         if step_limit > yaw > -step_limit and self.complete == 0:
             if array[0] < 0:
                 pi.write(DIR, cw)
@@ -117,6 +119,7 @@ class FiringSys(Node):
                     sleep(delay)
                     yaw += 1
             print(f"Yaw: {yaw}")
+
         # in case yaw exceeds recommended range
         elif -step_limit > yaw > step_limit and self.complete == 0:
             print("Exceeded pan range, returning to origin\n")
