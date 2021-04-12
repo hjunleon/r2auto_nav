@@ -44,7 +44,10 @@ class FiringSys(Node):
     def __init__(self):
         super().__init__('firing_mechanism')
         # constants to mark completion
-        self.complete = 0  # firing complete
+        self.servo_done = 0  # servo complete
+        self.stepper_done = 0  # stepper complete
+        self.dc_done = 0  # firing complete
+        self.loading_done = 0
         self.done = 'not done'  # firing complete AND returned to origin
         self.yaw = 0  # keep track of relative position of top layer
 
@@ -72,7 +75,7 @@ class FiringSys(Node):
 
     def callback_x(self, com_array):
         self.move_x(com_array.data)
-        print(f"Complete: {self.complete}")
+        print(f"Complete: {self.dc_done}")
         msg = String()
         msg.data = self.done
         self.pub.publish(msg)
@@ -95,7 +98,7 @@ class FiringSys(Node):
 
         pi.write(STEPPER_EN, 0)  # start stepper
 
-        if step_limit > self.yaw > -step_limit and self.complete == 0:
+        if step_limit > self.yaw > -step_limit and self.dc_done == 0:
             if array[0] < 0:
                 pi.write(DIR, cw)
                 print("Pan left\n")
@@ -125,7 +128,7 @@ class FiringSys(Node):
             print(f"Yaw: {self.yaw}")
 
         # in case yaw exceeds recommended range
-        elif -step_limit > self.yaw > step_limit and self.complete == 0:
+        elif -step_limit > self.yaw > step_limit and self.dc_done == 0:
             print("Exceeded pan range, returning to origin\n")
             while self.yaw:
                 # barrel on the right
@@ -143,8 +146,9 @@ class FiringSys(Node):
             print(f"Yaw: {self.yaw}")
 
         # when shooting is complete, move everything back to origin
-        if self.complete == 1:
+        if self.dc_done == 1:
             print("Shooting complete, pan returning to origin\n")
+            self.stepper_done = 1
             if self.yaw > 0:
                 pi.write(DIR, cw)
                 self.yaw -= 1
@@ -163,7 +167,7 @@ class FiringSys(Node):
                 print(f"Yaw @ origin: {self.yaw}")
 
         # turn off stepper
-        if self.yaw == 0 and self.complete == 1:
+        if self.yaw == 0 and self.dc_done == 1:
             pi.write(STEPPER_EN, 1)
             self.done = 'done'
 
@@ -173,31 +177,34 @@ class FiringSys(Node):
         flat_angle = 1850
         pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
 
-        if self.complete == 0:
+        if self.dc_done == 0:
             pi.set_servo_pulsewidth(Tilt_PWM, int(pulse))
+            self.servo_done = 1
             sleep(0.5)
 
-        if self.complete == 1:
+        if self.dc_done == 1:
             pi.set_servo_pulsewidth(Tilt_PWM, flat_angle)
+            self.servo_done = 1
             sleep(0.5)
 
     # power on dc motors when target is sighted, stop powering when target has been shot
     def fire(self, array):
-        if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.complete == 0:  # 1 for target found
+        if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.dc_done == 0:  # 1 for target found
             cur_pulse = pi.get_servo_pulsewidth(Tilt_PWM)
             print(f"cur pulse: {cur_pulse}")
             pi.write(M1, 1)
             pi.set_PWM_dutycycle(M_PWM, 180)  # motor on
-            pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse) # force servo up
+            pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)  # force servo up
 
-        if self.complete == 1:
+        if self.loading_done == 1:
             print("Firing complete, motors whining down\n")
             pi.write(M1, 0)
             pi.set_PWM_dutycycle(M_PWM, 0)  # motor off
+            self.dc_done = 1
 
     # loading of balls using servo motor
     def load(self, array):
-        if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.complete == 0:
+        if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.dc_done == 0:
             for i in range(4):
                 print("Loading ball\n")
                 pi.set_servo_pulsewidth(Loading_PWM, 1800)
@@ -205,7 +212,7 @@ class FiringSys(Node):
                 pi.set_servo_pulsewidth(Loading_PWM, 700)
                 sleep(0.5)
                 if i == 3:
-                    self.complete = 1
+                    self.loading_done = 1
 
 
 def main(args=None):
