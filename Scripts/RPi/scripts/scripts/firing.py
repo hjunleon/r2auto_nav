@@ -184,10 +184,6 @@ class FiringSys(Node):
             'fire_done',
             10)
 
-        # timer_period = 0.2  # seconds
-        # self.timer_x = self.create_timer(timer_period, self.callback_x)
-        # self.timer_y = self.create_timer(timer_period, self.callback_y)
-
     def callback_x(self, com_array):
         move_x(com_array.data)
 
@@ -279,3 +275,7 @@ if __name__ == '__main__':
 #         msg.data = done
 #         self.publisher_.publish(msg)
 #         self.get_logger().info(f'Done: {done}')
+
+# timer_period = 0.2  # seconds
+        # self.timer_x = self.create_timer(timer_period, self.callback_x)
+        # self.timer_y = self.create_timer(timer_period, self.callback_y)
