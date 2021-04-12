@@ -41,7 +41,7 @@ class HeatArray(Node):
 
     def callback(self):
         msg = Float64MultiArray()
-        resized_array = cv2.resize(np.array(amg.pixels), (resolution, resolution), interpolation=cv2.LANZOS4)
+        resized_array = cv2.resize(np.array(amg.pixels), (resolution, resolution), interpolation=cv2.INTER_LANZOS4)
         # INTER_AREA, INTER_LANCZOS4
         msg.data = np.reshape(resized_array, resolution * resolution).tolist()
         self.publisher_.publish(msg)
