@@ -116,10 +116,11 @@ class FiringSys(Node):
                     pi.write(STEP, 0)
                     sleep(delay)
                     yaw += 1
+            print(f"Yaw: {yaw}")
         # in case yaw exceeds recommended range
         elif -step_limit > yaw > step_limit and self.complete == 0:
             print("Exceeded pan range, returning to origin\n")
-            while yaw != 0:
+            while yaw:
                 # barrel on the right
                 if yaw > 0:
                     pi.write(DIR, cw)
@@ -132,6 +133,7 @@ class FiringSys(Node):
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
+            print(f"Yaw: {yaw}")
 
         # when shooting is complete, move everything back to origin
         if self.complete == 1:
@@ -142,11 +144,16 @@ class FiringSys(Node):
             elif yaw < 0:
                 pi.write(DIR, ccw)
                 yaw += 1
-            for steps in range(yaw):
+            while yaw:
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
+                if yaw > 0:
+                    yaw -= 1
+                elif yaw < 0:
+                    yaw += 1
+                print(f"Yaw @ origin: {yaw}")
 
         # turn off stepper
         if yaw == 0 and self.complete == 1:
@@ -171,6 +178,7 @@ class FiringSys(Node):
     def fire(self, array):
         if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.complete == 0:  # 1 for target found
             cur_pulse = pi.get_servo_pulsewidth(Tilt_PWM)
+            print(f"cur pulse: {cur_pulse}")
             pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)
             pi.write(M1, 1)
             pi.set_PWM_dutycycle(M_PWM, 180)  # motor on
