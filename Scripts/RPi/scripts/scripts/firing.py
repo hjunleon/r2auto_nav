@@ -84,7 +84,7 @@ def move_x(array):
         while yaw != 0:
             # barrel on the right
             if yaw > 0:
-                p.write(DIR, cw)
+                pi.write(DIR, cw)
                 yaw -= 1
             # barrel on the left
             elif yaw < 0:
