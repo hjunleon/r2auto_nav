@@ -54,13 +54,13 @@ pi.write(STEPPER_EN, 1)
 # com_array = [0,0] #x and y coordinate
 def move_x(array):
     yaw = 0  # keep track of relative position of top layer\
-    cw = 0  # clockwise
-    ccw = 1  # counter clockwise
+    CW = 0  # clockwise
+    CCW = 1  # counter clockwise
     delay = 0.005 / 32
     pi.write(STEPPER_EN, 0)
     if yaw < 200:
         if array[0] == -1:
-            pi.write(DIR, cw)
+            pi.write(DIR, CW)
             print("Pan left\n")
             for i in range(2):
                 pi.write(STEP, 1)
@@ -69,20 +69,20 @@ def move_x(array):
                 sleep(delay)
                 yaw -= 1
         elif array[0] == 1:
-            GPIO.output(DIR, ccw)
+            pi.write(DIR, CCW)
             print("Pan right\n")
             for i in range(2):
-                GPIO.output(STEP, GPIO.HIGH)
+                pi.write(STEP, 1)
                 sleep(delay)
-                GPIO.output(STEP, GPIO.LOW)
+                pi.write(STEP, 0)
                 sleep(delay)
                 yaw += 1
     else:
         print("Exceeded pan range, returning to origin\n")
         if yaw < 0:
-            GPIO.output(DIR, ccw)
+            p(DIR, CCW)
         elif yaw > 0:
-            GPIO.output(DIR, cw)
+            GPIO.output(DIR, CW)
         while yaw != 0:
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)
@@ -98,9 +98,9 @@ def move_x(array):
     if complete == 1:
         print("Shooting complete, pan returning to origin\n")
         if yaw < 0:
-            GPIO.output(DIR, ccw)
+            GPIO.output(DIR, CCW)
         elif yaw > 0:
-            GPIO.output(DIR, cw)
+            GPIO.output(DIR, CW)
         for steps in range(yaw):
             GPIO.output(STEP, GPIO.HIGH)
             sleep(delay)

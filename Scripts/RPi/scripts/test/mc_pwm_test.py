@@ -1,5 +1,4 @@
 from time import sleep
-import RPi.GPIO as GPIO
 import pigpio as pig
 
 M1 = 26
@@ -14,7 +13,7 @@ motor.set_PWM_dutycycle(13, 0) # motor off, 0 - 255
 def fire(begin):
     if begin == 'y':
         motor.write(M1, 1)
-        motor.set_PWM_dutycycle(13, 64) # motor on
+        motor.set_PWM_dutycycle(13, 180) # motor on
 
     elif begin == 'n':
         motor.write(M1, 0)
