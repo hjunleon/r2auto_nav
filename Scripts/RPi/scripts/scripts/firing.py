@@ -78,7 +78,7 @@ class FiringSys(Node):
         self.publisher_.publish(msg)
         self.get_logger().info(f'Done: {self.done}')
 
-    def callback_y(self, com_array):\
+    def callback_y(self, com_array):
         print(f"Complete: {self.complete}")
         self.move_y(com_array.data)
         self.fire(com_array.data)
