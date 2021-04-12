@@ -71,14 +71,14 @@ def command(coord):
     x_angle_diff, y_angle_diff = h_angle_limit * (x_hori_diff / (resolution / 2)), v_angle_limit * (y_vert_diff / (resolution / 2))
 
     if abs(x_angle_diff) >= angle_thres:
-        command_list[0] = float(x_angle_diff)
-    else:
-        command_list[0] = 0.0
-
-    if abs(y_angle_diff) >= angle_thres:
-        command_list[1] = float(y_angle_diff)
+        command_list[1] = float(x_angle_diff)
     else:
         command_list[1] = 0.0
+
+    if abs(y_angle_diff) >= angle_thres:
+        command_list[0] = float(y_angle_diff)
+    else:
+        command_list[0] = 0.0
 
     return command_list
 
