@@ -28,7 +28,7 @@ class CommandNode(Node):
     def __init__(self):
         super().__init__('com_node')
         self.publisher_ = self.create_publisher(Float32MultiArray, 'com_node', 10)
-        self.int_publisher = self.create_publisher(Float64MultiArray, 'heat_array')
+        self.int_publisher = self.create_publisher(Float64MultiArray, 'heat_array', 10)
         self.heat_subscription = self.create_subscription(Float32MultiArray, 'heat_ori', self.callback, 10)
         self.heat_subscription  # prevent unused variable warning
 
