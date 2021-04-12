@@ -72,14 +72,14 @@ class FiringSys(Node):
 
     def callback_x(self, com_array):
         self.move_x(com_array.data)
-
+        print(f"Complete: {self.complete}")
         msg = String()
         msg.data = self.done
         self.publisher_.publish(msg)
         self.get_logger().info(f'Done: {self.done}')
 
     def callback_y(self, com_array):
-        print(f"Complete: {self.complete}")
+
         self.move_y(com_array.data)
         self.fire(com_array.data)
         self.load(com_array.data)
@@ -100,7 +100,7 @@ class FiringSys(Node):
                 pi.write(DIR, cw)
                 print("Pan left\n")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
-                    print("turning left")
+                    # print("turning left")
                     pi.write(STEP, 1)
                     sleep(delay)
                     pi.write(STEP, 0)
@@ -110,7 +110,7 @@ class FiringSys(Node):
                 pi.write(DIR, ccw)
                 print("Pan right\n")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
-                    print("turning right")
+                    # print("turning right")
                     pi.write(STEP, 1)
                     sleep(delay)
                     pi.write(STEP, 0)
