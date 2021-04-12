@@ -33,13 +33,13 @@ done = 0 #turns to 1 when actuation is reset
 
 # setting up pins
 pi = pigpio.pi()
-pi.set_mode(DIR, pipi.write)
-pi.set_mode(STEP, pipi.write)
-pi.set_mode(STEPPER_EN, pipi.write)
-pi.set_mode(Tilt_PWM, pipi.write)
-pi.set_mode(Loading_PWM, pipi.write)
-pi.set_mode(M1, pipi.write)
-pi.set_mode(M_PWM, pipi.write)
+pi.set_mode(DIR, pigpio.OUTPUT)
+pi.set_mode(STEP, pigpio.OUTPUT)
+pi.set_mode(STEPPER_EN, pigpio.OUTPUT)
+pi.set_mode(Tilt_PWM, pigpio.OUTPUT)
+pi.set_mode(Loading_PWM, pigpio.OUTPUT)
+pi.set_mode(M1, pigpio.OUTPUT)
+pi.set_mode(M_PWM, pigpio.OUTPUT)
 
 # setting up PWM
 pi.set_PWM_frequency(M_PWM, 1000)  # motor pwm at 1000 hz
