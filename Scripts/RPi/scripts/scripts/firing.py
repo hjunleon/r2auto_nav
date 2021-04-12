@@ -15,10 +15,7 @@ from std_msgs.msg import Int8MultiArray
 
 # from std_msgs.msg import String
 from time import sleep
-import RPi.GPIO as GPIO
-
-# turn off warnings
-GPIO.setwarnings(False)
+import pigpio
 
 # pins based on BCM
 DIR = 22  # direction GPIO pin
@@ -35,10 +32,10 @@ complete = 0  # turns to 1 when firing is complete, controlled by a timer
 
 
 # setting up pins
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(DIR, GPIO.OUT)
-GPIO.setup(STEP, GPIO.OUT)
-GPIO.setup(STEPPER_EN, GPIO.OUT)
+pi = pigpio.pi()
+pi.set_mode(DIR, pigpio.OUTPUT)
+pi.set_mode(STEP, pigpio.OUTPUT)
+pi.set_mode(STEPPER_EN, pigpio.OUTPUT)
 GPIO.setup(Tilt_PWM, GPIO.OUT)
 GPIO.setup(Loading_PWM, GPIO.OUT)
 GPIO.setup(M1, GPIO.OUT)

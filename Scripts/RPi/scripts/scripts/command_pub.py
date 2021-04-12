@@ -16,8 +16,9 @@ import numpy as np
 
 # temperature threshold
 temp_thres = 30
-radius_thres = 5
+angle_thres = 5
 resolution = 64
+edge_angle = 20
 
 
 class CommandNode(Node):
@@ -65,21 +66,16 @@ def command(coord):
     # 1 == right, up
 
     command_list = [0, 0, coord[2]]
-    xdiff, ydiff = abs(coord[0] - resolution), abs(coord[1] - resolution)
+    x_hori_diff, y_hori_diff = coord[0] - (resolution // 2), coord[1] - (resolution // 2)
+    x_angle_diff, y_hori_diff = edge_angle * (x_hori_diff / (resolution // 2)), edge_angle * (y_hori_diff / (resolution // 2))
 
-    if xdiff >= radius_thres:
-        if coord[0] < resolution // 2:
-            command_list[0] = 1
-        elif coord[0] > resolution // 2:
-            command_list[0] = -1
+    if abs(x_angle_diff) >= angle_thres:
+        command_list[0] = x_angle_diff
     else:
         command_list[0] = 0
 
-    if ydiff >= radius_thres:
-        if coord[1] < resolution // 2:
-            command_list[1] = -1
-        elif coord[1] > resolution // 2:
-            command_list[1] = 1
+    if y_hori_diff >= angle_thres:
+        command_list[1] = y_hori_diff
     else:
         command_list[1] = 0
 

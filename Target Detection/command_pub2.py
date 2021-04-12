@@ -1,5 +1,13 @@
 # !usr/bin/python
 
+"""
+Created on Wed Mar 31, 2021
+Sensor: Newwing AMG8833 IR 8x8 Thermal Imager Array
+Author: @coldyoungguy
+
+Copy from r2auto_nav/Target Detection/command_pub2.py in git
+"""
+
 # ROS imports
 import rclpy
 from rclpy.node import Node
@@ -8,8 +16,9 @@ import numpy as np
 
 # temperature threshold
 temp_thres = 30
-radius_thres = 7
+radius_thres = 5
 resolution = 64
+edge_angle = 20
 
 
 class CommandNode(Node):
@@ -61,9 +70,9 @@ def command(coord):
 
     if xdiff >= radius_thres:
         if coord[0] < resolution // 2:
-            command_list[0] = -1
-        elif coord[0] > resolution // 2:
             command_list[0] = 1
+        elif coord[0] > resolution // 2:
+            command_list[0] = -1
     else:
         command_list[0] = 0
 
