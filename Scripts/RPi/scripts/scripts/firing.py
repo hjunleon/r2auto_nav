@@ -219,6 +219,8 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
         pi.stop()
+    finally:
+        pi.stop()
 
 ### TRASH ###
 # if 40 seconds have passed, complete  = 1
