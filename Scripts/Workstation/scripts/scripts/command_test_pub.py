@@ -6,7 +6,7 @@ class CommandNode(Node):
 
     def __init__(self):
         super().__init__('com_node')
-        self.publisher_ = self.create_publisher(Int8MultiArray, 'com_node', 10)
+        self.publisher_ = self.create_publisher(Float32MultiArray, 'com_node', 10)
         self.array = Float32MultiArray()
 
     def readKey(self):
