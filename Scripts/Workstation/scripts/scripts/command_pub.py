@@ -33,7 +33,8 @@ class CommandNode(Node):
         self.heat_subscription  # prevent unused variable warning
 
     def callback(self, heat_ori):
-        int_array = cv2.resize(np.array(heat_ori.data), (resolution, resolution), interpolation=cv2.INTER_LANCZOS4)
+        heat_ori_r = np.reshape(heat_ori.data, (8, 8))
+        int_array = cv2.resize(np.array(heat_ori_r), (resolution, resolution), interpolation=cv2.INTER_LANCZOS4)
         # INTER_AREA, INTER_LANCZOS4
         heat_array = Float64MultiArray()
         heat_array.data = np.reshape(int_array, resolution * resolution).tolist()
