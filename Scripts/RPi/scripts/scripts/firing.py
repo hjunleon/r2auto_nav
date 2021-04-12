@@ -97,7 +97,7 @@ class FiringSys(Node):
 
         pi.write(STEPPER_EN, 0)  # start stepper
 
-        if step_limit > yaw > -step_limit and self.complete == 0:
+        if step_limit > self.yaw > -step_limit and self.complete == 0:
             if array[0] < 0:
                 pi.write(DIR, cw)
                 print("Pan left\n")
@@ -107,7 +107,7 @@ class FiringSys(Node):
                     sleep(delay)
                     pi.write(STEP, 0)
                     sleep(delay)
-                    yaw -= 1
+                    self.yaw -= 1
             elif array[0] > 0:
                 pi.write(DIR, ccw)
                 print("Pan right\n")
@@ -117,49 +117,49 @@ class FiringSys(Node):
                     sleep(delay)
                     pi.write(STEP, 0)
                     sleep(delay)
-                    yaw += 1
-            print(f"Yaw: {yaw}")
+                    self.yaw += 1
+            print(f"Yaw: {self.yaw}")
 
         # in case yaw exceeds recommended range
-        elif -step_limit > yaw > step_limit and self.complete == 0:
+        elif -step_limit > self.yaw > step_limit and self.complete == 0:
             print("Exceeded pan range, returning to origin\n")
-            while yaw:
+            while self.yaw:
                 # barrel on the right
-                if yaw > 0:
+                if self.yaw > 0:
                     pi.write(DIR, cw)
-                    yaw -= 1
+                    self.yaw -= 1
                 # barrel on the left
-                elif yaw < 0:
+                elif self.yaw < 0:
                     pi.write(DIR, ccw)
-                    yaw += 1
+                    self.yaw += 1
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
-            print(f"Yaw: {yaw}")
+            print(f"Yaw: {self.yaw}")
 
         # when shooting is complete, move everything back to origin
         if self.complete == 1:
             print("Shooting complete, pan returning to origin\n")
-            if yaw > 0:
+            if self.yaw > 0:
                 pi.write(DIR, cw)
-                yaw -= 1
-            elif yaw < 0:
+                self.yaw -= 1
+            elif self.yaw < 0:
                 pi.write(DIR, ccw)
-                yaw += 1
-            while yaw:
+                self.yaw += 1
+            while self.yaw:
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
-                if yaw > 0:
-                    yaw -= 1
-                elif yaw < 0:
-                    yaw += 1
-                print(f"Yaw @ origin: {yaw}")
+                if self.yaw > 0:
+                    self.yaw -= 1
+                elif self.yaw < 0:
+                    self. += 1
+                print(f"Yaw @ origin: {self.yaw}")
 
         # turn off stepper
-        if yaw == 0 and self.complete == 1:
+        if self.yaw == 0 and self.complete == 1:
             pi.write(STEPPER_EN, 1)
             self.done = 'done'
 
