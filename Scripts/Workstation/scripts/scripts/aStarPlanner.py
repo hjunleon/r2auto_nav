@@ -45,6 +45,9 @@ def checkFootprintObstructed(footprint, cur_pos, grid):
 def distanceBetween2Cells(cell1,cell2):
     return utils.getEuDist4Cells(cell1,cell2)
 
+#def searchForNearby
+
+
 def astar(occupancy_grid, start, end, aStarConfig):
     """Returns a list of tuples as a path from the given start to the given end in the given maze"""
     
@@ -53,12 +56,15 @@ def astar(occupancy_grid, start, end, aStarConfig):
    # vac_val = aStarConfig["vacant"]
     footprint = None
     footprintRadius = 1
+    """
     if ("footprint" in aStarConfig):
         footprint = aStarConfig["footprint"]
         footprintRadius = aStarConfig["footprintRadius"]
     else:
         footprint = [(0,0)]    
-    #print("A star footprint: ", footprint)
+    """
+    footprint = [(0,0)]   #let local planner handle this
+   # print("A star footprint: ", footprint)
    # currentFootprintDisplacement = (0,0) #x,y displacements
     # Create start and end node
     start_node = Node(None, start)
@@ -81,8 +87,8 @@ def astar(occupancy_grid, start, end, aStarConfig):
     
     #Before looping, check whether this bot is even in a ssafe place
     if (checkFootprintObstructed(footprint, start, occupancy_grid)):
-        print("Obstructed from the start!")
-        return "invalid start"
+        #print("Obstructed from the start!")
+        #return "invalid start"
         print(footprint)
         footprint = [(0,0)]    
     

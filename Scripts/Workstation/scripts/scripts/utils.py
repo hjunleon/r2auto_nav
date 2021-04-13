@@ -19,6 +19,8 @@ import time
 
 import rclpy
 
+#import LocalPlannerLimits
+
 """
 u
 """
@@ -163,32 +165,93 @@ def createRobotPose(cur_pos, cur_rot):
     pose.orientation.w = cur_rot.w
     return pose
     
-def rotateOnTheSpot():
+def rotateOnTheSpotPose(degrees):
     drive_cmds = Pose()
     drive_cmds.position.x = 0.0
     drive_cmds.position.y = 0.0
-    drive_cmds.orientation.w = 1.0
+    drive_cmds.orientation.w = 0.0
     drive_cmds.orientation.x = 0.0
     drive_cmds.orientation.y = 0.0
-    drive_cmds.orientation.z = 1.0
+    drive_cmds.orientation.z = np.radians(degrees)
+    #cmd_vel = Twist()
+    #cmd_vel.linear.x = drive_cmds.position.x
+    #cmd_vel.linear.y = drive_cmds.position.y
+    #cmd_vel.angular.z = getYaw(drive_cmds.orientation)
+    return drive_cmds
+
+def rotateOnTheSpot(degrees):
     cmd_vel = Twist()
-    cmd_vel.linear.x = drive_cmds.position.x
-    cmd_vel.linear.y = drive_cmds.position.y
-    cmd_vel.angular.z = getYaw(drive_cmds.orientation)
+    cmd_vel.linear.x = 0.0
+    cmd_vel.linear.y = 0.0
+    cmd_vel.angular.z = np.radians(degrees)
+    
+    if (abs(cmd_vel.angular.z) > 0.5):
+        cmd_vel.angular.z = 0.5
     return cmd_vel
     
-def reverse():
+
+    
+def reverseCmdVel(cmd_vel):
+    
+    ret_vel = Twist()
+    ret_vel.linear.x = -cmd_vel.linear.x
+    ret_vel.linear.y = -cmd_vel.linear.y
+    ret_vel.angular.z = -cmd_vel.angular.z
+    
+    return  ret_vel
+
+
+def moveBackCmdVel():
+     
     cmd_vel = Twist()
     cmd_vel.linear.x = -0.22
     cmd_vel.linear.y = 0.0
     cmd_vel.angular.z = 0.0
+    
     return cmd_vel
-def forward():
+
+
+
+def reverse():
+    drive_cmds = Pose()
+    drive_cmds.position.x = -0.22
+    drive_cmds.position.y = 0.0
+    drive_cmds.orientation.w = 0.0
+    drive_cmds.orientation.x = 0.0
+    drive_cmds.orientation.y = 0.0
+    drive_cmds.orientation.z = 0.0
+    
+    
+    """
+    cmd_vel = Twist()
+    cmd_vel.linear.x = -0.22
+    cmd_vel.linear.y = 0.0
+    cmd_vel.angular.z = 0.0
+    """
+    return drive_cmds
+
+def moveForwardCmdVel():
     cmd_vel = Twist()
     cmd_vel.linear.x = 0.22
     cmd_vel.linear.y = 0.0
     cmd_vel.angular.z = 0.0
     return cmd_vel
+    
+def forward():
+    drive_cmds = Pose()
+    drive_cmds.position.x = 0.22
+    drive_cmds.position.y = 0.0
+    drive_cmds.orientation.w = 0.0
+    drive_cmds.orientation.x = 0.0
+    drive_cmds.orientation.y = 0.0
+    drive_cmds.orientation.z = 0.0
+    """
+    cmd_vel = Twist()
+    cmd_vel.linear.x = 0.22
+    cmd_vel.linear.y = 0.0
+    cmd_vel.angular.z = 0.0
+    """
+    return drive_cmds
         
 def cellXYtoROWCOL(coord):
     return (coord[1],coord[0])
