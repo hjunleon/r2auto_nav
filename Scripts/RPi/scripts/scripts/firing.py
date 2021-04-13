@@ -104,27 +104,27 @@ class FiringSys(Node):
                 print("Pan left\n")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
                     # check if will exceed limit, allows for more precision
-                    if step_limit > self.yaw > -step_limit:
-                        pi.write(STEP, 1)
-                        sleep(delay)
-                        pi.write(STEP, 0)
-                        sleep(delay)
-                        self.yaw -= 1
-                    else:
-                        continue
+                    # if step_limit > self.yaw > -step_limit:
+                    pi.write(STEP, 1)
+                    sleep(delay)
+                    pi.write(STEP, 0)
+                    sleep(delay)
+                    self.yaw -= 1
+                    # else:
+                    #     continue
             elif array[0] > 0:
                 pi.write(DIR, ccw)
                 print("Pan right\n")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
                     # check if will exceed limit, allows for more precision
-                    if step_limit > self.yaw > -step_limit:
-                        pi.write(STEP, 1)
-                        sleep(delay)
-                        pi.write(STEP, 0)
-                        sleep(delay)
-                        self.yaw += 1
-                    else:
-                        continue
+                    # if step_limit > self.yaw > -step_limit:
+                    pi.write(STEP, 1)
+                    sleep(delay)
+                    pi.write(STEP, 0)
+                    sleep(delay)
+                    self.yaw += 1
+                    # else:
+                    #     continue
             print(f"Yaw: {self.yaw}")
 
         # in case yaw exceeds recommended range
