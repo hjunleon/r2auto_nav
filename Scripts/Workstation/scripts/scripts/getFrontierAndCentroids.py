@@ -83,7 +83,7 @@ def getfrontier(mapData,botPos, binned_grid):
     
     #return img4 100, 350,   50,350
     canny_output = cv2.Canny(checkOcc, 25, 350)#cv2.Canny(checkOcc, 225, 250)#cv2.Canny(checkOcc, 100, 150), 125, 350   25,350   #cv2.Canny(checkOcc, 225, 250) #works on gazebo
-    element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))  #(3,3) maybe too thick so may produce random spots. Thicker may form longer contoues but that isn't priority. Correctness is priority
+    element = cv2.getStructuringElement(cv2.MORPH_CROSS,(2,2))  #(3,3) maybe too thick so may produce random spots. Thicker may form longer contoues but that isn't priority. Correctness is priority
     # (1,1) looks clean but calculating moments inaccurate, will result in [0,0] cuz not enclosed
     #(2,2) abit thick but abit no choice ah. Is there better ways to find moments?
     # Possibility: (2,2) for moments, (1,1) for final
@@ -111,7 +111,7 @@ def getfrontier(mapData,botPos, binned_grid):
     edge_output = cv2.erode(edge_output,element)
     """
     
-    kernel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(1,1))    #(3,3)
+    kernel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(2,2))    #(3,3)
     edge_output = cv2.morphologyEx(edge_output, cv2.MORPH_OPEN, kernel)
 
     

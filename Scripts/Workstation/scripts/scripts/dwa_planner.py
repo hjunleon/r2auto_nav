@@ -44,7 +44,7 @@ class DWAPlanner():
         
         self._cost_funcs = kwargs.get("cost_funcs",listOfCostFuncs)
         self._trajectoryScorers = trajectoryScorer(self._cost_funcs, NUM_OF_SAMPLE_TRAJECTORIES ** 3)
-        self.xy_goal_tolerance = 0.08 * 1.5#0.21 * 1.25 #* 1.25#0.10fatter_edges
+        self.xy_goal_tolerance = 0.1 * 1.5#0.21 * 1.25 #* 1.25#0.10fatter_edges
         self.recovery_method = kwargs.get("recovery_method","reverse_current_trajectory")
         self.currentCmdVelocity = None
         
@@ -166,7 +166,7 @@ class DWAPlanner():
         localised_plan_section = []
         #incrementDistThresh = self.robot_limits.getMaxVelX() / 2 #* 1.25
         #while(len(localised_plan_section) == 0): #having just one is stupid, cuz that's just the origin possibly? Even then, where should it go
-        dist_threshold  = 0.40#0.30
+        dist_threshold  = 0.20#0.30 #the map is 8x8 
         
         #print("Distance threshold: ", dist_threshold) #Bear in mind, the distance threshold honestly should be longer. Because we dont want this cock to be too short until same index
         
@@ -261,17 +261,20 @@ class DWAPlanner():
         lidar = self.lidarRange
         #if(lidar == None):
           
-        #print("Have to recover abit first")
+        print("Have to recover abit first")
         lri = lidar.nonzero()
         #print('Distances: %s' % str(lidar))
         #if (len(lri) > 0):
             
         if(self.recovery_method == 'reverse_current_trajectory'):
-            #print("Reverse")
-            #print("traj stack length: ", len(self.trajStack))
+            print("Reverse")
+            print("traj stack length: ", len(self.trajStack))
             previousVel = self.trajStackPop()
+            print(previousVel)
             if(previousVel == None):
-                return self.recoverByLidar()
+                lidarCmd =  self.recoverByLidar()
+                print("lidarCmd:", lidarCmd )
+                return lidarCmd
                 #return "isRecovered"
             #print("Previous vel")
             #print(previousVel)
@@ -291,7 +294,7 @@ class DWAPlanner():
         return cmd_velocities
     
     def recoverByLidar(self):
-        #print("do some rotate and move away hahaha")
+        print("do some rotate and move away hahaha")
         #lr2i = np.nanargmax(lidar)
         #lidar = self.lidarRange
         lrShortest = np.nanargmin(self.lidarRange)
@@ -301,15 +304,15 @@ class DWAPlanner():
         lidarCmd = None
         #print("Adjusting rotation")
         
-        if(lrShortest > 45 and lrShortest < 325):
+        if(lrShortest > 45 and lrShortest < 315):
             if ((lrShortest < 90)):
                 return utils.rotateOnTheSpot(lrShortest)
             elif (lrShortest < 180):
-                return utils.rotateOnTheSpot(lrShortest - 180 )
+                return utils.rotateOnTheSpot(180 - lrShortest )
             elif (lrShortest < 270):
-                return utils.rotateOnTheSpot( 180 - lrShortest)
+                return utils.rotateOnTheSpot( lrShortest - 180)
             else:
-                return utils.rotateOnTheSpot(-lrShortest)
+                return utils.rotateOnTheSpot(lrShortest - 360)
         """
         if(not ((lrShortest > 350 and lrShortest < 10) or (lrShortest > 170 and lrShortest < 190))):
             #if(lrShortest <= 270 and lrShortest >= 90):
@@ -318,7 +321,7 @@ class DWAPlanner():
         """
        # print("Adjusting Distance away")
         
-        if(self.lidarRange[lrShortest] < 0.5):   #0.2 dpends on a star map and costmap
+        if(self.lidarRange[lrShortest] < 0.25):   #0.2 dpends on a star map and costmap
             print(self.lidarRange[lrShortest])
             if (lrShortest > 270 or lrShortest < 90):
                 #linearDir = "goBack"
