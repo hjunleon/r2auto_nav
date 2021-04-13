@@ -180,7 +180,7 @@ class FiringSys(Node):
 
         flat_angle = 1850
         max_angle = 1510
-        pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
+        pulse = flat_angle - abs(10 * (array[1])) # formula to translate angle to pulse width
 
         if self.dc_done == 0 and self.servo_done == 0:
             pi.set_servo_pulsewidth(Tilt_PWM, int(pulse))
