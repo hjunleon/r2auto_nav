@@ -211,15 +211,17 @@ class FiringSys(Node):
 
             # vibration hotfix
             pi.write(DIR, cw)
-            pi.write(STEP, 1)
-            sleep(delay)
-            pi.write(STEP, 0)
-            sleep(delay)
+            for i in range(2)
+                pi.write(STEP, 1)
+                sleep(delay)
+                pi.write(STEP, 0)
+                sleep(delay)
             pi.write(DIR, ccw)
-            pi.write(STEP, 1)
-            sleep(delay)
-            pi.write(STEP, 0)
-            sleep(delay)
+            for i in range(2)
+                pi.write(STEP, 1)
+                sleep(delay)
+                pi.write(STEP, 0)
+                sleep(delay)
 
         if self.loading_done == 1:
             print("Firing complete, motors whining down")
