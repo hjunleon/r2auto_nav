@@ -34,7 +34,7 @@ pi.set_mode(M_PWM, pigpio.OUTPUT)
 
 # setting up PWM
 pi.set_PWM_frequency(M_PWM, 1000)  # motor pwm at 1000 hz
-pi.set_servo_pulsewidth(Tilt_PWM, 1650)  # upwards: 1650, flat: 1840
+pi.set_servo_pulsewidth(Tilt_PWM, 1650)  # upwards: 1510, flat: 1840
 pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
 pi.write(STEPPER_EN, 1)
@@ -50,6 +50,7 @@ class FiringSys(Node):
         self.loading_done = 0
         self.done = 'not done'  # firing complete AND returned to origin
         self.yaw = 0  # keep track of relative position of top layer
+        self.prev_pulse = 1650
 
         # sub 1 for x axis
         self.sub1 = self.create_subscription(
@@ -180,11 +181,14 @@ class FiringSys(Node):
 
         flat_angle = 1850
         max_angle = 1510
-        pulse = flat_angle - abs(10 * (array[1])) # formula to translate angle to pulse width
+        pulse = self.prev_pulse
+        if array[1] != 0:
+            pulse = flat_angle - abs(10 * (array[1])) # formula to translate angle to pulse width
 
         if self.dc_done == 0 and self.servo_done == 0:
             pi.set_servo_pulsewidth(Tilt_PWM, int(pulse))
             self.servo_done = 1
+            self.prev_pulse = pulse
             sleep(0.5)
 
         # if self.dc_done == 1 and self.stepper_done == 1:
