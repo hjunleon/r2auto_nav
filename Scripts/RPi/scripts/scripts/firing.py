@@ -233,9 +233,9 @@ class FiringSys(Node):
             for i in range(5):
                 print("Loading ball")
                 pi.set_servo_pulsewidth(Loading_PWM, 1800)
-                sleep(0.2)
+                sleep(0.5)
                 pi.set_servo_pulsewidth(Loading_PWM, 700)
-                sleep(0.2)
+                sleep(0.1)
                 if i == 4:
                     self.loading_done = 1
 
