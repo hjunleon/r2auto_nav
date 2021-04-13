@@ -16,7 +16,7 @@ import numpy as np
 import cv2
 
 # temperature threshold
-temp_thres = 27
+temp_thres = 26
 h_angle_limit = 21.8 # at 100cm away, horizontal view is 40cm
 v_angle_limit = 26.6 # at 100cm away, vertical view is 50cm
 resolution = 64
