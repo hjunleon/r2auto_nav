@@ -166,6 +166,8 @@ class bokuNoNav(Node):
         self.goal_publisher_ = self.create_publisher(PoseStamped,'goal_pose',10) 
         self.action_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         
+        self.sendFrontierGoalTime = 0
+        
         pose_qos = QoSProfile(
           durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
           reliability=QoSReliabilityPolicy.RELIABLE,
@@ -219,7 +221,11 @@ class bokuNoNav(Node):
         if(self.currentTfFrame == None):
             print("currentTfFrame still None")
             return 
-        
+        currentTime = utils.current_milli_time()
+        if(currentTime - self.sendFrontierGoalTime > 2000):
+            self.sendFrontierGoalTime = currentTime
+        else:
+            return
         robot_vel = self.OdomRobotMovement.getVelocity()
         x = robot_vel.linear.x
         y = robot_vel.linear.y
@@ -315,8 +321,8 @@ class bokuNoNav(Node):
         startPos = mBotPos
         endPos = tuple(frontierCells[shortestPathIdx])
         for idx,frontier in enumerate(frontierWorldPts):
-            dist = utils.getRoughEuclideanDistance(cur_pos, frontier)
-            endPos = tuple(frontierCells[shortestPathIdx])
+            dist = utils.getEuclideanDistance(cur_pos, frontier)    #.(cur_pos, frontier)
+            endPos = tuple(frontierCells[idx])
             print("dist: ", dist)
             print("Last time cell: ", self.currentEndCell)
             if (utils.areCellsEqual(startPos , endPos)):
@@ -326,6 +332,7 @@ class bokuNoNav(Node):
                 print("endPos and self.currentEndCell equal")
                 continue
             if dist < shortestDistance:
+                print("Shortest Distance is: ", )
                 shortestDistance = dist
                 shortestPathIdx = idx
           
@@ -345,6 +352,10 @@ class bokuNoNav(Node):
         tryGoal.header.frame_id = 'map'
         tryGoal.pose.position = endPosWorld
         #if (tryGoal == self.currentFrontierGoal):
+        prevTime = utils.current_milli_time()
+        curTime = utils.current_milli_time()
+        while (curTime-prevTime == 500):
+            self.stopbot()    
             
         
         self.currentEndCell = endPos

@@ -44,7 +44,7 @@ class DWAPlanner():
         
         self._cost_funcs = kwargs.get("cost_funcs",listOfCostFuncs)
         self._trajectoryScorers = trajectoryScorer(self._cost_funcs, NUM_OF_SAMPLE_TRAJECTORIES ** 3)
-        self.xy_goal_tolerance = 0.21 #* 1.25#0.10fatter_edges
+        self.xy_goal_tolerance = 0.08 * 1.5#0.21 * 1.25 #* 1.25#0.10fatter_edges
         self.recovery_method = kwargs.get("recovery_method","reverse_current_trajectory")
         self.currentCmdVelocity = None
         
@@ -52,8 +52,8 @@ class DWAPlanner():
         
         #print("Instantiating trajectory generator")
         trajGen = SimpleTrajectoryGenearator(
-            sim_time = 0.5, #derive this value from the average tf callback interval EDIT: 1.0 too slow. Acutally may bbe too fast cuz my given architecture works such that it favours equidistant points. So it favours faster moving points
-            sim_period = 0.5, #sim_period is the controller frequency
+            sim_time = 1.7, #derive this value from the average tf callback interval EDIT: 1.0 too slow. Acutally may bbe too fast cuz my given architecture works such that it favours equidistant points. So it favours faster moving points
+            sim_period = 0.125, #sim_period is the controller frequency
             sim_granularity = 0.5,#1.0,#0.5,#0.025,0.123
             angular_sim_granularity = 0.5,#1.0,#0.5,#0.1,
             discretise_by_time = True,
@@ -103,7 +103,7 @@ class DWAPlanner():
         
         bestTraj = self._trajectoryScorers.findBestTrajectory(trajGen)
         if (bestTraj == None or bestTraj.getCost() < 0):
-            cmd_velocities = self.recover(None, None, None)
+            cmd_velocities = None#self.recover(None, None, None)
             
         else:
             #cmd_velocities.position.x = bestTraj._xv
@@ -118,9 +118,8 @@ class DWAPlanner():
             cmd_velocities.orientation.y = quat[1]
             cmd_velocities.orientation.z = quat[2]
             cmd_velocities.orientation.w = quat[3]
-            self.trajStackPush(cmd_velocities)
-            
-        self.currentCmdVelocity = cmd_velocities
+            #self.trajStackPush(cmd_velocities)    
+            self.currentCmdVelocity = cmd_velocities
         return bestTraj, cmd_velocities
         
     
@@ -165,69 +164,69 @@ class DWAPlanner():
         #max vel * SIM granularity
         dist_threshold = 0.0 #self.robot_limits.getMaxVelX() * 1.0 #because i wanna it to change direction at most twice a second       #max(costmap_h * costmap.getMapResolution() / 2.0 , costmap_w * costmap.getMapResolution() / 2.0 )
         localised_plan_section = []
-        incrementDistThresh = self.robot_limits.getMaxVelX() * 1.25
-        while(len(localised_plan_section) == 0): #having just one is stupid, cuz that's just the origin possibly? Even then, where should it go
-            dist_threshold  += incrementDistThresh
-            
-            #print("Distance threshold: ", dist_threshold) #Bear in mind, the distance threshold honestly should be longer. Because we dont want this cock to be too short until same index
-            
-            
-            
-            #sq_dist_threshold = dist_threshold ** 2 
-            sq_dist = 0
-            if (current_transformed_plan != None):
-                global_plan_idx = current_transformed_plan.getGlobalStartIdx()
-            else:
-                global_plan_idx = 0#global_plan.getCurrentIndex()
-            #print(global_plan.getPointsLength(), global_plan_idx)
-            localised_plan_section = []
-            
-            #get the roughly closest point to the path (im assuming it follows the path well enough)
-            #get the roug
-            nearestPoint = global_plan.getByIdx(global_plan_idx).pose
-            nearestDist = float('inf')
-            nearestIdx = global_plan_idx
-            
-            while(global_plan_idx < global_plan.getPointsLength()):
-                #print("Finding nearest point: ", sq_dist, sq_dist_threshold)
-                cur_global_plan_pose = global_plan.getByIdx(global_plan_idx).pose
-                x_diff = robot_pose.position.x - cur_global_plan_pose.position.x
-                y_diff = robot_pose.position.y - cur_global_plan_pose.position.y
-                sq_dist = math.sqrt(x_diff * x_diff + y_diff * y_diff)
-                #localised_plan_section.append(global_plan.getByIdx(global_plan_idx))
-                if (nearestDist > sq_dist):
-                    nearestDist = sq_dist
-                    nearestPoint = cur_global_plan_pose
-                    nearestIdx = global_plan_idx
-                #print("Current distance: ", sq_dist)
-                if (sq_dist >= dist_threshold):
-                   # print("Furthest point in sim period is :")
-                    #print(global_plan_idx)
-                    break
-                global_plan_idx += 1
-                global_plan.setCurrentIndex(global_plan_idx)
+        #incrementDistThresh = self.robot_limits.getMaxVelX() / 2 #* 1.25
+        #while(len(localised_plan_section) == 0): #having just one is stupid, cuz that's just the origin possibly? Even then, where should it go
+        dist_threshold  = 0.40#0.30
         
-            localised_plan_section = global_plan.getAllPosestamps()[nearestIdx:global_plan_idx]
-            """
-                    
-            while(global_plan_idx < global_plan.getPointsLength() and sq_dist <= dist_threshold):
-                #print("Creating transformed path")
-                print("Distance away: ", sq_dist)
-                localised_plan_section.append(global_plan.getByIdx(global_plan_idx))
-                cur_global_plan_pose = global_plan.getByIdx(global_plan_idx).pose
-                x_diff = robot_pose.position.x - cur_global_plan_pose.position.x
-                y_diff = robot_pose.position.y - cur_global_plan_pose.position.y
-                sq_dist = math.sqrt(x_diff * x_diff + y_diff * y_diff)
+        #print("Distance threshold: ", dist_threshold) #Bear in mind, the distance threshold honestly should be longer. Because we dont want this cock to be too short until same index
+        
+        
+        
+        #sq_dist_threshold = dist_threshold ** 2 
+        sq_dist = 0
+        if (current_transformed_plan != None):
+            global_plan_idx = current_transformed_plan.getGlobalStartIdx()
+        else:
+            global_plan_idx = 0#global_plan.getCurrentIndex()
+        #print(global_plan.getPointsLength(), global_plan_idx)
+        localised_plan_section = []
+        
+        #get the roughly closest point to the path (im assuming it follows the path well enough)
+        #get the roug
+        nearestPoint = global_plan.getByIdx(global_plan_idx).pose
+        nearestDist = float('inf')
+        nearestIdx = global_plan_idx
+        
+        while(global_plan_idx < global_plan.getPointsLength()):
+            #print("Finding nearest point: ", sq_dist, sq_dist_threshold)
+            cur_global_plan_pose = global_plan.getByIdx(global_plan_idx).pose
+            x_diff = robot_pose.position.x - cur_global_plan_pose.position.x
+            y_diff = robot_pose.position.y - cur_global_plan_pose.position.y
+            sq_dist = math.sqrt(x_diff * x_diff + y_diff * y_diff)
+            #localised_plan_section.append(global_plan.getByIdx(global_plan_idx))
+            if (nearestDist > sq_dist):
+                nearestDist = sq_dist
+                nearestPoint = cur_global_plan_pose
+                nearestIdx = global_plan_idx
+            #print("Current distance: ", sq_dist)
+            if (sq_dist >= dist_threshold):
+               # print("Furthest point in sim period is :")
+                #print(global_plan_idx)
+                break
+            global_plan_idx += 1
+            global_plan.setCurrentIndex(global_plan_idx)
+    
+        localised_plan_section = global_plan.getAllPosestamps()[nearestIdx:global_plan_idx]
+        """
                 
-                global_plan_idx += 1
-                global_plan.setCurrentIndex(global_plan_idx)
-            """
-            #print("Distance away: ", sq_dist)
-            #print("Current goal pose is ")
-            #print(globaself.dwa_planner.lidarRangel_plan.getByIdx(global_plan_idx).pose)
-            #print(global_plan_idx, global_plan.getCurrentIndex())
+        while(global_plan_idx < global_plan.getPointsLength() and sq_dist <= dist_threshold):
+            #print("Creating transformed path")
+            print("Distance away: ", sq_dist)
+            localised_plan_section.append(global_plan.getByIdx(global_plan_idx))
+            cur_global_plan_pose = global_plan.getByIdx(global_plan_idx).pose
+            x_diff = robot_pose.position.x - cur_global_plan_pose.position.x
+            y_diff = robot_pose.position.y - cur_global_plan_pose.position.y
+            sq_dist = math.sqrt(x_diff * x_diff + y_diff * y_diff)
             
-            print("Windowed plan length: ", len(localised_plan_section),nearestIdx,global_plan_idx)
+            global_plan_idx += 1
+            global_plan.setCurrentIndex(global_plan_idx)
+        """
+        #print("Distance away: ", sq_dist)
+        #print("Current goal pose is ")
+        #print(globaself.dwa_planner.lidarRangel_plan.getByIdx(global_plan_idx).pose)
+        #print(global_plan_idx, global_plan.getCurrentIndex())
+        
+        #print("Windowed plan length: ", len(localised_plan_section),nearestIdx,global_plan_idx)
         local_plan = TransformedPlan(localised_plan_section,nearestIdx,global_plan_idx) #since this is transformed, just get finalGoalPose
         return local_plan
     
@@ -256,83 +255,81 @@ class DWAPlanner():
     
     
     def recover(self, lidar, robotPose, cmd_vel_publisher):
-        print("Recovering")
-        cmd_velocities = self.currentCmdVelocity
+        #print("Recovering")
+        cmd_velocities = Twist()#self.currentCmdVelocity
+        #print(lidar)
+        lidar = self.lidarRange
+        #if(lidar == None):
+          
+        #print("Have to recover abit first")
+        lri = lidar.nonzero()
+        #print('Distances: %s' % str(lidar))
+        #if (len(lri) > 0):
             
-        if(cmd_velocities == None):
-            print("Have to recover abit first")
-            cmd_velocities = Pose()
-            lri = lidar.nonzero()
-            #print('Distances: %s' % str(lri))
-            #if (len(lri) > 0):
-            if (lri == None or len(lri) == 0):
-                #wait for lidar data
-                cmd_velocities.position.x = 0.0
-                cmd_velocities.position.y = 0.0
-               #cmd_velocities.position.z = 0
-                cmd_velocities.orientation.w = 0.0
-                cmd_velocities.orientation.x = 0.0
-                cmd_velocities.orientation.y = 0.0
-                cmd_velocities.orientation.z = 0.0
-            else:
-                self.recoverByLidar(cmd_vel_publisher)
-                return "isRecovered"
-        elif(self.recovery_method == 'reverse_current_trajectory'):
-            print("Reverse")
-            #print(self.trajStack)
+        if(self.recovery_method == 'reverse_current_trajectory'):
+            #print("Reverse")
+            #print("traj stack length: ", len(self.trajStack))
             previousVel = self.trajStackPop()
             if(previousVel == None):
-                self.recoverByLidar(cmd_vel_publisher)
-                return "isRecovered"
+                return self.recoverByLidar()
+                #return "isRecovered"
             #print("Previous vel")
             #print(previousVel)
-            cmd_velocities.position.x = -previousVel.position.x
-            cmd_velocities.position.y = -previousVel.position.y
-            cmd_velocities.orientation.x = -previousVel.orientation.x
-            cmd_velocities.orientation.y = -previousVel.orientation.y
-            cmd_velocities.orientation.z = -previousVel.orientation.z
-            cmd_velocities.orientation.w = -previousVel.orientation.w
+            cmd_velocities.linear.x = -previousVel.position.x
+            cmd_velocities.linear.y = 0.0
+            cmd_velocities.angular.z = utils.getYaw(cmd_velocities.orientation)
+            
+        elif (lri == None or len(lri) == 0):
+            #wait for lidar data
+            cmd_velocities.linear.x = 0.0
+            cmd_velocities.linear.y = 0.0
+            cmd_velocities.angular.z = 0.0
         else:
-            print("Default spin and pray")
-            cmd_velocities.position.x = 0.0
-            cmd_velocities.position.y = 0.0
-           #cmd_velocities.position.z = 0
-            cmd_velocities.orientation.w = 1.0
-            cmd_velocities.orientation.x = 0.0
-            cmd_velocities.orientation.y = 0.0
-            cmd_velocities.orientation.z = 1.0
-        
+            cmd_velocities = self.recoverByLidar()
+            #return "isRecovered"
+      
         return cmd_velocities
     
-    def recoverByLidar(self, cmd_vel_publisher):
-        print("do some rotate and move away hahaha")
+    def recoverByLidar(self):
+        #print("do some rotate and move away hahaha")
         #lr2i = np.nanargmax(lidar)
         #lidar = self.lidarRange
         lrShortest = np.nanargmin(self.lidarRange)
-        print('Picked direction: %d %f m' % (lrShortest, self.lidarRange[lrShortest]))
+        #print('Picked direction: %d %f m' % (lrShortest, self.lidarRange[lrShortest]))
         #robotYaw = utils.getYaw(robotPose.orientation)
         
+        lidarCmd = None
+        #print("Adjusting rotation")
         
-        print("Adjusting rotation")
-        while(not (lrShortest > 350 or lrShortest < 10 or lrShortest > 170 or lrShortest < 190)):
+        if(lrShortest > 45 and lrShortest < 325):
+            if ((lrShortest < 90)):
+                return utils.rotateOnTheSpot(lrShortest)
+            elif (lrShortest < 180):
+                return utils.rotateOnTheSpot(lrShortest - 180 )
+            elif (lrShortest < 270):
+                return utils.rotateOnTheSpot( 180 - lrShortest)
+            else:
+                return utils.rotateOnTheSpot(-lrShortest)
+        """
+        if(not ((lrShortest > 350 and lrShortest < 10) or (lrShortest > 170 and lrShortest < 190))):
             #if(lrShortest <= 270 and lrShortest >= 90):
             lrShortest = np.nanargmin(self.lidarRange)
-            cmd_vel_publisher.publish(utils.rotateOnTheSpot())
-            time.sleep(0.25)
+            return utils.rotateOnTheSpot()
+        """
+       # print("Adjusting Distance away")
         
-        print("Adjusting Distance away")
-        
-        while(self.lidarRange[lrShortest] < 0.30):
+        if(self.lidarRange[lrShortest] < 0.5):   #0.2 dpends on a star map and costmap
             print(self.lidarRange[lrShortest])
             if (lrShortest > 270 or lrShortest < 90):
                 #linearDir = "goBack"
-                cmd_vel_publisher.publish(utils.reverse())
+                return utils.moveBackCmdVel()
                     
             else:
                 #linearDir = "goForward"
-                cmd_vel_publisher.publish(utils.forward())
-            time.sleep(0.25)
+                return utils.moveForwardCmdVel()
+        else:
+            lidarCmd = "isRecovered"
             
-        print('After position: %d %f m' % (lrShortest, self.lidarRange[lrShortest]))    
+        #print('After position: %d %f m' % (lrShortest, self.lidarRange[lrShortest]))    
         
-        print("Should have recovered sufficiently")
+        return lidarCmd

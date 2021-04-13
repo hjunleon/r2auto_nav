@@ -63,9 +63,9 @@ class trajectoryScorer():
         if(bestTraj == None):
             print("Best Traj None??")
         #else:
-            #print("Best traj cost: ", bestTraj.getCost())
-            #print("Best traj points", bestTraj.getAllPoints())
-            #print("Best traj getVelocities: ", bestTraj.getVelocities())
+        #    print("Best traj cost: ", bestTraj.getCost())
+        #    print("Best traj points", bestTraj.getAllPoints())
+        #    print("Best traj getVelocities: ", bestTraj.getVelocities())
         return bestTraj
             
         

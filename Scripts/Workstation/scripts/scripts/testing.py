@@ -88,7 +88,7 @@ def euler_from_quaternion(x, y, z, w):
 class bokuNoNav(Node):
     def __init__(self):
         super().__init__('boku_no_nav')
-        self.cmd_publisher_ = self.create_publisher(Twist,'cmd_vel',12)  #original 10
+        self.cmd_publisher_ = self.create_publisher(Twist,'cmd_vel',10)  #original 10
         self.odom_subscription = self.create_subscription(
             Odometry,
             'odom',
@@ -135,6 +135,8 @@ class bokuNoNav(Node):
         self.lidarDistance = None
         self.forwardAngles = [-20,20]
         self.backwardAngles = [160,200]
+        
+        self.goalAssignedTime = 0
         
         
         #self.tfTimeInterval = 0
@@ -226,24 +228,31 @@ class bokuNoNav(Node):
         if(self.currentTfFrame == None):
             print("currentTfFrame still None")
             return 
+        #print("Is recovering? ", self.isRobotRecovering)
+        
         #binning grid
         grid_edges = binMap(msg)
-        astar_grid_edges = widenBin(grid_edges,1) #for A star to not hug so tightly 
-        costmap = costmap2d(msg, astar_grid_edges, footprint_spec) #grid_edges, fatter_edges
+        astar_grid_edges = widenBin(grid_edges,3) #for A star to not hug so tightly
+        # either we single cell, but thicken walls
+        # or footprint and narrower, but scarier
+        costmap_grid_edges = widenBin(grid_edges,1)
+        costmap = costmap2d(msg, costmap_grid_edges, footprint_spec) #grid_edges, fatter_edges
         self.currentCostmap = costmap
         self.dwa_planner.updateCostmap(costmap)
         
-        if (not self.RobotState == ["Mapping","Evaluating"]):
+        currentTime = utils.current_milli_time()
+        
+        if ((not self.RobotState == ["Mapping","Evaluating"]) and  (currentTime - self.goalAssignedTime < 10000)):
             return
         #if (len(self.RobotState) == 2 and self.RobotState[0] == "Mapping" and self.RobotState[1] == "Travelling" or self.RobotState[1] == "LocalPlan"):
         #    return
         
-        
+        self.goalAssignedTime = currentTime
         
         #we dont want the bot flying around while planning
         self.stopbot()
-        time.sleep(0.25) # If a star computes fast rnough and got no chance to stop
-        
+        time.sleep(0.1) # If a star computes fast rnough and got no chance to stop
+        #0.25s works but slow
         
         
         
@@ -257,7 +266,7 @@ class bokuNoNav(Node):
         
         
         #trying to pass a fattened grid
-        frontierImg, frontierCells, frontierWorldPts,mBotPos, grid_edges, fatter_edges = getfrontier(msg,cur_pos,grid_edges)
+        frontierImg, frontierCells, frontierWorldPts,mBotPos, grid_edges2, fatter_edges = getfrontier(msg,cur_pos,grid_edges)
        # print("FRONTIERS")
        # print(frontierCells)
      #   print(len(frontierCells))
@@ -271,7 +280,7 @@ class bokuNoNav(Node):
         }
         
         binary_grid_edges = []
-        for row in fatter_edges: #grid_edges, fatter_edges
+        for row in fatter_edges: #grid_edges, fatter_edges, astar_grid_edges
             temp = []         
             for col in row:
                 if col == 255:
@@ -324,7 +333,8 @@ class bokuNoNav(Node):
                 shortestPathIdx = idx
           """  
         
-        
+        startPos = mBotPos
+        endPos = None
         
         
         #try to just do a star on this?
@@ -382,23 +392,23 @@ class bokuNoNav(Node):
             self.recover()
             return
             
-        print("Shortest path is: ", shortestPath[0], shortestPath[len(shortestPath) - 1], len(shortestPath))
-        print(shortestEnd)
-        print(shortestPath)
+        #print("Shortest path is: ", shortestPath[0], shortestPath[len(shortestPath) - 1], len(shortestPath))
+        #print(shortestEnd)
+        #print(shortestPath)
         poses = utils.convertPlanToPoses(shortestPath, costmap.getMapOrigin(), costmap.getMapResolution())
         #print("Poses length: ", len(poses))
         global_plan = GlobalPlan(poses)
         self.global_plan = global_plan
-        goal = poses[len(poses) - 1].pose.position
-        nextPoint = poses[1].pose.position
+        #goal = poses[len(poses) - 1].pose.position
+        #nextPoint = poses[1].pose.position
         
         
         #endPose = utils.mapToWorld2(endPos, costmap.getMapOrigin(), costmap.getMapResolution())
-        inc_x = nextPoint.x - cur_pos.x
-        inc_y = nextPoint.y - cur_pos.y
-        angleBetween = math.atan2(inc_y, inc_x) - yaw # this works
-        print("Bot yaw: ", np.degrees(yaw))
-        print("angle between points??"  , angleBetween, np.degrees(angleBetween))
+        #inc_x = nextPoint.x - cur_pos.x
+        #inc_y = nextPoint.y - cur_pos.y
+        #angleBetween = math.atan2(inc_y, inc_x) - yaw # this works
+        #print("Bot yaw: ", np.degrees(yaw))
+        #print("angle between points??"  , angleBetween, np.degrees(angleBetween))
         #return
         
         self.RobotState = ["Mapping","LocalPlan"]
@@ -421,19 +431,13 @@ class bokuNoNav(Node):
         #np.savetxt(scanfile, self.laser_range)
         # replace 0's with nan
         self.laser_range[self.laser_range==0] = np.nan
-        print("Updating lidarRange")
+        #print(self.laser_range)
+        #print("Updating lidarRange")
         self.dwa_planner.lidarRange = self.laser_range
         
-        if(self.currentTfFrame == None):
-            print("currentTfFrame still None")
-            return 
-        shortestDistIdx = np.nanargmin(self.laser_range)
-        if (self.laser_range[shortestDistIdx] < 0.12):
-            
-            if((shortestDistIdx < 20 and shortestDistIdx > -20) or (shortestDistIdx > 160 and shortestDistIdx < 180) ):
-                print("Emergency! Front and back too near")
-                self.stopbot()
-                self.recover()
+        #if(self.currentTfFrame == None):
+        #    print("currentTfFrame still None")
+        #    return 
         
         
         
@@ -506,16 +510,28 @@ class bokuNoNav(Node):
         #what i suspect is happening here is, the path havent done yet, then i clear everything
         windowed_plan = self.dwa_planner.transformGlobalPlan(robot_pose, global_plan, costmap, self.windowed_plan)
         
+        
+        if (len(windowed_plan.getAllPoses()) < 2):
+            self.windowed_plan = None
+            self.RobotState = ["Mapping","Evaluating"]
+            return
         self.windowed_plan =  windowed_plan
         #print("ROBOT VELOCITY")
         #print(robot_vel)
         bestTraj, bestCmd = self.dwa_planner.findBestPath(robot_pose, robot_vel, windowed_plan)
+        
         #print("BEST PATH")
+        #print(bestTraj)
+        #print(bestCmd)
         if (bestTraj == None):
-            print("bestTraj is none, so just rotate and hope for the best? Alternatively, activate a recovery plan that moves away from closest point")
-            print("Maybe backtrack and recompute")
-            self.stopbot()
+            
+            #print("bestTraj is none, so just rotate and hope for the best? Alternatively, activate a recovery plan that moves away from closest point")
+            #print("Maybe backtrack and recompute")
             self.recover()
+            #self.RobotState = ["Mapping","Evaluating"]
+            return
+            #self.stopbot()
+            #self.recover()
         #else:
         #    print(vel_x, vel_y, np.degrees(vel_th)
             #vel_x, vel_y, vel_th = bestTraj.getVelocities()
@@ -530,29 +546,44 @@ class bokuNoNav(Node):
             #self.dwa_planner.trajStackPush(self.finalCmd)
             
             
-        #print(finalCmd)
+        #print(self.finalCmd)
         #print("Entire plan vs windowed length: ", len(self.global_plan.getAllPoses()), len(windowed_plan.getAllPoses()))
-        #print(startPos,endPos)
+       
         self.cmd_publisher_.publish(self.finalCmd)
         #self.RobotMovement.updateFrame(trans)
         self.RobotState = ["Mapping","Travelling"]
     
     def recover(self):
-        #if (not self.isRobotRecovering):
-        self.isRobotRecovering = True
+        
+        #if(self.isRobotRecovering == False):
+        #    self.stopbot()
+        #self.isRobotRecovering = True
+        #print(self.laser_range)
+        #reverseCmd = utils.reverseCmdVel(self.finalCmd)
+        
+        #self.cmd_publisher_.publish(reverseCmd)
+        #time.sleep(0.75)
+        
+        #return
+        if(len(self.laser_range.nonzero()) == 0):
+            return
         bestCmd = self.dwa_planner.recover(self.laser_range, self.getRobotPose(), self.cmd_publisher_)
+        #print("best cmd")
+        #print(bestCmd)
         if (bestCmd == "isRecovered"):
             self.isRobotRecovering = False
             return
+        #print("Recovery pose")
+        #print(bestCmd)
+        #print("Current cmd")
+        #print(self.finalCmd)
+        self.finalCmd = bestCmd #self.dwa_planner.convertTrajectoryToTwist(bestCmd)
         
-        print("Current cmd")
-        print(self.finalCmd)
-        self.finalCmd = self.dwa_planner.convertTrajectoryToTwist(bestCmd)
         
-        
-        print("Recovery cmd: ")
-        print(self.finalCmd)
-        self.cmd_publisher_.publish(self.finalCmd)
+        #print("Recovery cmd: ")
+        #print(self.finalCmd)
+        self.cmd_publisher_.publish(bestCmd)
+        time.sleep(0.25)
     def mover(self):
         try:
             # initialize variable to write elapsed time to file
@@ -566,32 +597,43 @@ class bokuNoNav(Node):
                 
                 if (self.RobotState[0] == "Mapping" and (self.RobotState[1] == "Complete")):
                     break
+                """
                 if self.laser_range.size != 0:
                     # check distances in front of TurtleBot and find values less
                     # than stop_distance
                     #lri = (self.laser_range[front_angles]<float(stop_distance)).nonzero()
+                    shortestDistIdx = np.nanargmin(self.laser_range)
                     
-                    
-                    #self.lidarDistances = lri
-                    #print(self.laser_range)
-                    #self.get_logger().info('Distances: %s' % str(lri))
-                    #if (len(lri) > 0):
-                    #    return
-                    # if the list is not empty
-                    """
-                    if(len(lri[0])>0):
-                        # stop moving
-                        self.stopbot()
-                        # find direction with the largest distance from the Lidar
-                        # rotate to that direction
-                        # start moving
-                        self.pick_direction()
-                    """
+                    if (self.laser_range[shortestDistIdx] < 0.1):
+                        
+                        if((shortestDistIdx < 20 and shortestDistIdx > -20) or (shortestDistIdx > 160 and shortestDistIdx < 200) ):
+                            print("Emergency! Front and back too near")
+                            #
+                            self.recover()
+                        else:
+                            print("robot has recovered 1")
+                            self.isRobotRecovering = False
+                    else:
+                        #print("robot has recovered 2")
+                        self.isRobotRecovering = False
+                """    
+                #self.lidarDistances = lri
+                #print(self.laser_range)
+                #self.get_logger().info('Distances: %s' % str(lri))
+                #if (len(lri) > 0):
+                #    return
+                # if the list is not empty
+                """
+                if(len(lri[0])>0):
+                    # stop moving
+                    self.stopbot()
+                    # find direction with the largest distance from the Lidar
+                    # rotate to that direction
+                    # start moving
+                    self.pick_direction()
+                """
                 
-                
-                
-                
-                
+                               
                 
                 currentTime = utils.current_milli_time()
                 #delayThreshold = 50
@@ -605,10 +647,12 @@ class bokuNoNav(Node):
                     #print("Checking if reached goal")
                     if (self.dwa_planner.isGoalReached(cur_pos,None,cur_goal_pose)):
                         print("Goal has REACHED")
+                        self.stopbot()
+                        time.sleep(0.1)
                         self.windowed_plan = None
                         self.RobotState = ["Mapping","Evaluating"]
                         continue
-                    if (currentTime - self.localPlannerTime >=( 100 )): #125, 100, 75 can achive, 50 dies
+                    if (currentTime - self.localPlannerTime >=( 125 )): #125, 100, 75 can achive with power supply, 50 dies
                         #print("Interval: ", currentTime - self.localPlannerTime)
                         self.executeLocalPlanning(currentTime)
                         self.localPlannerTime = currentTime

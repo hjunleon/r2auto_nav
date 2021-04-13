@@ -8,13 +8,13 @@ Created on Mon Apr  5 22:52:38 2021
 class LocalPlannerLimits():
     #by right should just parse a yaml file but nahhhhhhhh
     def __init__(self, *args, **kwargs):
-        self.max_vel_x = 0.22
+        self.max_vel_x = 0.16 #0.22 seems too fast after all
         self.max_vel_y = 0.0
-        self.min_vel_x = -self.max_vel_x#0.0 the bot can reverse what 
+        self.min_vel_x = -0.16  #-self.max_vel_x#0.0 the bot can reverse
         self.min_vel_y = 0.0
-        self.max_vel_theta = 0.75 #/ 2
-        self.min_vel_theta = -0.75 #/ 2 #Given how velocity iterator runs, it's best to use this
-        self.max_speed_xy = 0.22
+        self.max_vel_theta = 1.0 #0.75 / 2
+        self.min_vel_theta = -1.0 #/ 2 #Given how velocity iterator runs, it's best to use this
+        self.max_speed_xy = 0.16  #0.22
         self.min_x_velocity_threshold = 0.001
         self.acc_lim_x = 2.5
         self.acc_lim_y = 0.0

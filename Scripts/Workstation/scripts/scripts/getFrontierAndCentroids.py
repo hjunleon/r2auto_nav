@@ -19,12 +19,12 @@ from geometry_msgs.msg import Point
 
 
 occ_bins_all_edge = [-1,0.1,100]
-occ_bins_occupied = [-1,52,100] #51
+occ_bins_occupied = [-1,51,100] #51
 occ_bins_within = [-1,0,100] 
 original_occ_bins = [-1, 0, 50,100]
 cannyThresh = 250
 ALTHRESH = 10
-DILATE_PIXELS = 5
+DILATE_PIXELS = 5 #5
 ERODE_PIXELS = 7
 
 
@@ -54,7 +54,7 @@ def binMap(mapData):
     return binned_grid
 
 def widenBin(binned_grid, pixels):
-    element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(pixels,pixels))
+    element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(pixels,pixels)) #eliipse fatter better
     return cv2.dilate(binned_grid,element)
 
 def getfrontier(mapData,botPos, binned_grid):
@@ -81,9 +81,9 @@ def getfrontier(mapData,botPos, binned_grid):
     
     
     
-    #return img4 100, 350
-    canny_output = cv2.Canny(checkOcc, 50, 350)#cv2.Canny(checkOcc, 225, 250)#cv2.Canny(checkOcc, 100, 150), 125, 350   25,350   #cv2.Canny(checkOcc, 225, 250) #works on gazebo
-    element = cv2.getStructuringElement(cv2.MORPH_CROSS,(4,4))  #(3,3) maybe too thick so may produce random spots. Thicker may form longer contoues but that isn't priority. Correctness is priority
+    #return img4 100, 350,   50,350
+    canny_output = cv2.Canny(checkOcc, 25, 350)#cv2.Canny(checkOcc, 225, 250)#cv2.Canny(checkOcc, 100, 150), 125, 350   25,350   #cv2.Canny(checkOcc, 225, 250) #works on gazebo
+    element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))  #(3,3) maybe too thick so may produce random spots. Thicker may form longer contoues but that isn't priority. Correctness is priority
     # (1,1) looks clean but calculating moments inaccurate, will result in [0,0] cuz not enclosed
     #(2,2) abit thick but abit no choice ah. Is there better ways to find moments?
     # Possibility: (2,2) for moments, (1,1) for final
@@ -111,7 +111,7 @@ def getfrontier(mapData,botPos, binned_grid):
     edge_output = cv2.erode(edge_output,element)
     """
     
-    kernel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(3,3))
+    kernel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(1,1))    #(3,3)
     edge_output = cv2.morphologyEx(edge_output, cv2.MORPH_OPEN, kernel)
 
     
@@ -184,7 +184,7 @@ def getfrontier(mapData,botPos, binned_grid):
     res = cv2.dilate(res,element)
     contoured_image += res;
     
-    element = cv2.getStructuringElement(cv2.MORPH_CROSS,(2,2)) #5,8,5MORPH_CROSS, MORPH_ELLIPSE (1,1)
+    element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)) #5,8,5MORPH_CROSS, MORPH_ELLIPSE (1,1), (2,2)
     img5 = cv2.dilate(binned_grid,element)
     
     
