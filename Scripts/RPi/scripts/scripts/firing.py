@@ -161,10 +161,10 @@ class FiringSys(Node):
                 pi.write(DIR, ccw)
                 self.yaw += 1
             while self.yaw:
-                pi.write(STEP, 1)
-                sleep(delay)
-                pi.write(STEP, 0)
-                sleep(delay)
+                # pi.write(STEP, 1)
+                # sleep(delay)
+                # pi.write(STEP, 0)
+                # sleep(delay)
                 if self.yaw > 0:
                     self.yaw -= 1
                 elif self.yaw < 0:
@@ -204,7 +204,7 @@ class FiringSys(Node):
             cur_pulse = pi.get_servo_pulsewidth(Tilt_PWM)
             print(f"cur pulse: {cur_pulse}")
             pi.write(M1, 1)
-            pi.set_PWM_dutycycle(M_PWM, 180)  # motor on
+            pi.set_PWM_dutycycle(M_PWM, 125)  # motor on
             # pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)  # force servo up
 
             # vibration hotfix
@@ -233,9 +233,9 @@ class FiringSys(Node):
             for i in range(5):
                 print("Loading ball")
                 pi.set_servo_pulsewidth(Loading_PWM, 1800)
-                sleep(0.5)
+                sleep(0.2)
                 pi.set_servo_pulsewidth(Loading_PWM, 700)
-                sleep(0.5)
+                sleep(0.2)
                 if i == 4:
                     self.loading_done = 1
 
