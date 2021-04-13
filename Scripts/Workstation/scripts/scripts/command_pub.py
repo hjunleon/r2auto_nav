@@ -47,7 +47,7 @@ class CommandNode(Node):
         self.int_publisher.publish(heat_array)
         self.publisher_.publish(comm_array)
         self.get_logger().info(
-            f'Direction: X:{comm_array.data[0]}, Y:{comm_array.data[1]}, Active:{comm_array.data[2]}')
+            f'Direction: X:{comm_array.data[0]}, Y:{comm_array.data[1]}, Active:{comm_array.data[2]}. Temp:{heat_array.data[coordinates[1]][coordinates[0]]}')
 
 
 # def get_bright_loc(array):
