@@ -192,12 +192,30 @@ class FiringSys(Node):
 
     # power on dc motors when target is sighted, stop powering when target has been shot
     def fire(self, array):
+        cw = 0  # clockwise
+        ccw = 1  # counter clockwise
+        delay = 3000 * (10 ** -6)
+
         if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.dc_done == 0:  # 1 for target found
             cur_pulse = pi.get_servo_pulsewidth(Tilt_PWM)
             print(f"cur pulse: {cur_pulse}")
             pi.write(M1, 1)
             pi.set_PWM_dutycycle(M_PWM, 180)  # motor on
             pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)  # force servo up
+
+            # vibration hotfix
+            pi.write(DIR, cw)
+            pi.write(STEP, 1)
+            sleep(delay)
+            pi.write(STEP, 0)
+            sleep(delay)
+            pi.write(DIR, ccw)
+            pi.write(STEP, 1)
+            sleep(delay)
+            pi.write(STEP, 0)
+            sleep(delay)
+
+
 
         if self.loading_done == 1:
             print("Firing complete, motors whining down")
@@ -234,6 +252,7 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         print(e)
+        pi.write(STEPPER_EN, 1)
         pi.stop()
     finally:
         pi.stop()
