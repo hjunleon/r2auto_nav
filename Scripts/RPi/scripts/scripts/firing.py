@@ -175,15 +175,16 @@ class FiringSys(Node):
         sleep(1)  # pseudo debouncing
 
         flat_angle = 1850
+        max_angle = 1510
         pulse = flat_angle - 10 * (array[1])  # formula to translate angle to pulse width
 
-        if self.dc_done == 0:
+        if self.dc_done == 0 and self.servo_done == 0:
             pi.set_servo_pulsewidth(Tilt_PWM, int(pulse))
             self.servo_done = 1
             sleep(0.5)
 
-        if self.dc_done == 1:
-            pi.set_servo_pulsewidth(Tilt_PWM, flat_angle)
+        if self.dc_done == 1 and self.stepper_done == 1:
+            pi.set_servo_pulsewidth(Tilt_PWM, max_angle)
             self.servo_done = 1
             sleep(0.5)
 
