@@ -48,8 +48,8 @@ class FiringSys(Node):
         self.stepper_done = 0  # stepper complete
         self.dc_done = 0  # firing complete
         self.loading_done = 0
-        self.done = 'not done'   # firing complete AND returned to origin
-        self.yaw = 0  #  keep track of relative position of top layer
+        self.done = 'not done'  # firing complete AND returned to origin
+        self.yaw = 0  # keep track of relative position of top layer
 
         # sub 1 for x axis
         self.sub1 = self.create_subscription(
