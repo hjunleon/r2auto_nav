@@ -95,7 +95,7 @@ class AutoNav(Node):
         # Node subscribes to messages from the targeting node
         self.targeting_subscription = self.create_subscription(
             String,
-            'targeting_status',
+            'fire_done',
             self.target_callback,
             10)
         self.targeting_subscription  # prevent unused variable warning
@@ -160,20 +160,22 @@ class AutoNav(Node):
         self.current_y = curr_state[1]
         self.current_yaw = curr_state[2]
 
+    Jasshan, [13.04.21 17: 44]
+
     def target_callback(self, msg):
         global isTargetDetected, isDoneShooting
         self.get_logger().info('In target_callback')
         self.get_logger().info('I heard: "%s"' % msg.data)
-        if (msg.data == 'Detected'):
+        if msg.data == 'Detected':
             print('Target Detected')
             isTargetDetected = True
             isDoneShooting = False
-        elif (msg.data == 'Done'):
+        elif msg.data == 'Annihilated':
             print('Is Done shooting')
             isDoneShooting = True
             isTargetDetected = False
         else:
-            print('No Target Detected')
+            print('Searching')
             isTargetDetected = False
 
     def odom_callback(self, msg):
