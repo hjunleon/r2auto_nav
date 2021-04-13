@@ -101,10 +101,11 @@ class FiringSys(Node):
         if step_limit > self.yaw > -step_limit and self.dc_done == 0:
             if array[0] < 0:
                 pi.write(DIR, cw)
-                print("Pan left\n")
+                print("Pan left")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
                     # check if will exceed limit, allows for more precision
                     # if step_limit > self.yaw > -step_limit:
+                    print("turning left")
                     pi.write(STEP, 1)
                     sleep(delay)
                     pi.write(STEP, 0)
@@ -114,10 +115,11 @@ class FiringSys(Node):
                     #     continue
             elif array[0] > 0:
                 pi.write(DIR, ccw)
-                print("Pan right\n")
+                print("Pan right")
                 for i in range(int(array[0] // 1.8) * teeth_scale):
                     # check if will exceed limit, allows for more precision
                     # if step_limit > self.yaw > -step_limit:
+                    print("turning right")
                     pi.write(STEP, 1)
                     sleep(delay)
                     pi.write(STEP, 0)
@@ -129,7 +131,7 @@ class FiringSys(Node):
 
         # in case yaw exceeds recommended range
         elif -step_limit > self.yaw > step_limit and self.dc_done == 0:
-            print("Exceeded pan range, returning to origin\n")
+            print("Exceeded pan range, returning to origin")
             while self.yaw:
                 # barrel on the right
                 if self.yaw > 0:
@@ -147,7 +149,7 @@ class FiringSys(Node):
 
         # when shooting is complete, move everything back to origin
         if self.dc_done == 1:
-            print("Shooting complete, pan returning to origin\n")
+            print("Shooting complete, pan returning to origin")
             self.stepper_done = 1
             if self.yaw > 0:
                 pi.write(DIR, cw)
@@ -198,7 +200,7 @@ class FiringSys(Node):
             pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)  # force servo up
 
         if self.loading_done == 1:
-            print("Firing complete, motors whining down\n")
+            print("Firing complete, motors whining down")
             pi.write(M1, 0)
             pi.set_PWM_dutycycle(M_PWM, 0)  # motor off
             self.dc_done = 1
@@ -207,7 +209,7 @@ class FiringSys(Node):
     def load(self, array):
         if array[0] == 0 and array[1] == 0 and array[2] == 1 and self.dc_done == 0:
             for i in range(4):
-                print("Loading ball\n")
+                print("Loading ball")
                 pi.set_servo_pulsewidth(Loading_PWM, 1800)
                 sleep(0.5)
                 pi.set_servo_pulsewidth(Loading_PWM, 700)
@@ -217,7 +219,7 @@ class FiringSys(Node):
 
 
 def main(args=None):
-    print("Actuation initialised\n")
+    print("Actuation initialised")
     rclpy.init(args=args)
 
     firing_sys = FiringSys()
