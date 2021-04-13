@@ -235,7 +235,7 @@ class FiringSys(Node):
                 pi.set_servo_pulsewidth(Loading_PWM, 1800)
                 sleep(0.5)
                 pi.set_servo_pulsewidth(Loading_PWM, 700)
-                sleep(0.1)
+                sleep(0.5)
                 if i == 4:
                     self.loading_done = 1
 
