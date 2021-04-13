@@ -9,7 +9,7 @@ EN = 6
 DIR = 22  # direction GPIO pin
 STEP = 27  # step GPIO pin
 
-step = 100
+step = 50
 delay = 3000 * (10 ** -6)
 CW = 1  # clockwise
 CCW = 0  # counter clockwise

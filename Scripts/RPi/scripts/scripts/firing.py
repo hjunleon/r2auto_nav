@@ -48,7 +48,7 @@ class FiringSys(Node):
         self.stepper_done = 0  # stepper complete
         self.dc_done = 0  # firing complete
         self.loading_done = 0
-        self.done = 'searching'  # firing complete AND returned to origin
+        self.done = 'Searching'  # firing complete AND returned to origin
         self.yaw = 0  # keep track of relative position of top layer
         self.prev_pulse = 1650
 
@@ -174,7 +174,7 @@ class FiringSys(Node):
         # turn off stepper
         if self.yaw == 0 and self.dc_done == 1:
             pi.write(STEPPER_EN, 1)
-            self.done = 'annihilated'
+            self.done = 'Annihilated'
 
     def move_y(self, array):
         sleep(1)  # pseudo debouncing
@@ -192,7 +192,7 @@ class FiringSys(Node):
             sleep(0.5)
 
         if array[2] == 1:
-            self.done = "target found"
+            self.done = "Detected"
 
     # power on dc motors when target is sighted, stop powering when target has been shot
     def fire(self, array):
