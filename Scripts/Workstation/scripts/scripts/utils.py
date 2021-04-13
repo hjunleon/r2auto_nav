@@ -185,8 +185,8 @@ def rotateOnTheSpot(degrees):
     cmd_vel.linear.y = 0.0
     cmd_vel.angular.z = np.radians(degrees)
     
-    if (abs(cmd_vel.angular.z) > 0.5):
-        cmd_vel.angular.z = 0.5
+    if (abs(cmd_vel.angular.z) > 0.75):
+        cmd_vel.angular.z = 0.75
     return cmd_vel
     
 

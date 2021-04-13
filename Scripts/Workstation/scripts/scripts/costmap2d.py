@@ -29,11 +29,11 @@ class costmap2d():
         self.footprint_spec = footprint_spec #just fk it, navstack too complicated. A series of points describing edges of footprint or radius  for circular shape
         self.worldFootprint = None
         self.mapFootprint = None
-        radius = 0.12 #safer? 0.12,0.125, 0.11, 0.125,0.13
+        radius = 0.08 #safer? 0.12,0.125, 0.11, 0.125,0.13
         self.worldBaseFootprint = self.makeFootprintFromRadius(radius)
         #print(self.worldBaseFootprint[0])
         self.mapBaseFootprint = self.formMapBaseFootprint(self.worldBaseFootprint)
-        self.robotRadiusInCells = math.ceil(radius / self.getMapResolution()) #frankly idk whether to be safe than sorry
+        self.robotRadiusInCells = round(radius / self.getMapResolution()) #frankly idk whether to be safe than sorry
         #print("Initialising costmap")
         #print(self.mapBaseFootprint) #math.ceil
         #print("Robot base: ", self.robotRadiusInCells)

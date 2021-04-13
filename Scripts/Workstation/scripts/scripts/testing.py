@@ -232,10 +232,10 @@ class bokuNoNav(Node):
         
         #binning grid
         grid_edges = binMap(msg)
-        astar_grid_edges = widenBin(grid_edges,3) #for A star to not hug so tightly
+        astar_grid_edges = widenBin(grid_edges,2) #for A star to not hug so tightly
         # either we single cell, but thicken walls
         # or footprint and narrower, but scarier
-        costmap_grid_edges = widenBin(grid_edges,1)
+        costmap_grid_edges = grid_edges#widenBin(grid_edges,1)
         costmap = costmap2d(msg, costmap_grid_edges, footprint_spec) #grid_edges, fatter_edges
         self.currentCostmap = costmap
         self.dwa_planner.updateCostmap(costmap)
@@ -280,7 +280,7 @@ class bokuNoNav(Node):
         }
         
         binary_grid_edges = []
-        for row in fatter_edges: #grid_edges, fatter_edges, astar_grid_edges
+        for row in astar_grid_edges: #grid_edges, fatter_edges, astar_grid_edges
             temp = []         
             for col in row:
                 if col == 255:
@@ -652,7 +652,7 @@ class bokuNoNav(Node):
                         self.windowed_plan = None
                         self.RobotState = ["Mapping","Evaluating"]
                         continue
-                    if (currentTime - self.localPlannerTime >=( 125 )): #125, 100, 75 can achive with power supply, 50 dies
+                    if (currentTime - self.localPlannerTime >=( 200 )): #125, 100, 75 can achive with power supply, 50 dies
                         #print("Interval: ", currentTime - self.localPlannerTime)
                         self.executeLocalPlanning(currentTime)
                         self.localPlannerTime = currentTime
