@@ -211,13 +211,13 @@ class FiringSys(Node):
 
             # vibration hotfix
             pi.write(DIR, cw)
-            for i in range(2)
+            for i in range(2):
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
                 sleep(delay)
             pi.write(DIR, ccw)
-            for i in range(2)
+            for i in range(2):
                 pi.write(STEP, 1)
                 sleep(delay)
                 pi.write(STEP, 0)
