@@ -7,3 +7,9 @@ Hello readers, on top of the code present here below are some helpful links to e
 
 
 EG2310 Algo Research: https://docs.google.com/document/d/1sQ1H7nJIePaXPmjvzxNqh4ws5_xse7VH4cq7usQmAJE/edit?usp=sharing
+
+Video demonstrations are in the video demo folder
+
+
+
+
