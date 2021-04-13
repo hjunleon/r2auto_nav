@@ -105,31 +105,23 @@ class FiringSys(Node):
                 pi.write(DIR, cw)
                 print("Pan left")
                 for i in range(abs(int(array[0] // 1.8)) * teeth_scale):
-                    # check if will exceed limit, allows for more precision
-                    # if step_limit > self.yaw > -step_limit:
                     print("turning left")
                     pi.write(STEP, 1)
                     sleep(delay)
                     pi.write(STEP, 0)
                     sleep(delay)
                     self.yaw -= 1
-                    # else:
-                    #     continue
             elif array[0] > 0:
                 pi.write(STEPPER_EN, 0)  # start stepper
                 pi.write(DIR, ccw)
                 print("Pan right")
                 for i in range(abs(int(array[0] // 1.8)) * teeth_scale):
-                    # check if will exceed limit, allows for more precision
-                    # if step_limit > self.yaw > -step_limit:
                     print("turning right")
                     pi.write(STEP, 1)
                     sleep(delay)
                     pi.write(STEP, 0)
                     sleep(delay)
                     self.yaw += 1
-                    # else:
-                    #     continue
             print(f"Yaw: {self.yaw}")
 
         # in case yaw exceeds recommended range
@@ -205,7 +197,6 @@ class FiringSys(Node):
             print(f"cur pulse: {cur_pulse}")
             pi.write(M1, 1)
             pi.set_PWM_dutycycle(M_PWM, 125)  # motor on
-            # pi.set_servo_pulsewidth(Tilt_PWM, cur_pulse)  # force servo up
 
             # vibration hotfix
             pi.write(DIR, cw)
