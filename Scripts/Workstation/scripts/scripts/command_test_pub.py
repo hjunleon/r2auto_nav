@@ -13,8 +13,11 @@ class CommandNode(Node):
     def readKey(self):
         try:
             while True:
-                _ = input('enter')
-                command = [20.0, 10.0, 1.0]
+                x = input('enter')
+                if x == "0":
+                    command = [20.0, 10.0, 1.0]
+                elif x == "1":
+                    command = [0.0, 0.0, 1.0]
 
                 self.array.data = command
                 self.publisher_.publish(self.array)
