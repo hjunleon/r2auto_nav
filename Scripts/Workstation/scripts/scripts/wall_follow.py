@@ -411,8 +411,7 @@ class AutoNav(Node):
         twist = Twist()
         twist.linear.x = -speedchange
         twist.angular.z = 0.0
-        lrback = (self.laser_range[back_angles] < float(
-            0.40)).nonzero()
+        lrback = (self.laser_range[back_angles] < float(0.40)).nonzero()
         self.publisher_.publish(twist)
         while len(lrback[0]) <= 0:
             time.sleep(1)
