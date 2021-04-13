@@ -160,7 +160,6 @@ class AutoNav(Node):
         self.current_y = curr_state[1]
         self.current_yaw = curr_state[2]
 
-    Jasshan, [13.04.21 17: 44]
 
     def target_callback(self, msg):
         global isTargetDetected, isDoneShooting
