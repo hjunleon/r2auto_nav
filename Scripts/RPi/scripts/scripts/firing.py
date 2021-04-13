@@ -102,7 +102,7 @@ class FiringSys(Node):
             if array[0] < 0:
                 pi.write(DIR, cw)
                 print("Pan left")
-                for i in range(int(array[0] // 1.8) * teeth_scale):
+                for i in range(array[0] // 1.8 * teeth_scale):
                     # check if will exceed limit, allows for more precision
                     # if step_limit > self.yaw > -step_limit:
                     print("turning left")
@@ -116,7 +116,7 @@ class FiringSys(Node):
             elif array[0] > 0:
                 pi.write(DIR, ccw)
                 print("Pan right")
-                for i in range(int(array[0] // 1.8) * teeth_scale):
+                for i in range(array[0] // 1.8 * teeth_scale):
                     # check if will exceed limit, allows for more precision
                     # if step_limit > self.yaw > -step_limit:
                     print("turning right")
