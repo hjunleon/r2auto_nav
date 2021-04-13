@@ -32,7 +32,7 @@ from PIL import Image
 
 # constants
 rotatechange = 0.5
-speedchange = 0.10
+speedchange = 0.15
 occ_bins = [-1, 0, 100, 101]
 stop_distance = 0.40
 map_bg_color = 1
@@ -53,8 +53,8 @@ isTargetDetected = False
 isDoneShooting = False
 
 # To change before starting test
-stopping_time_in_seconds = 1200
-initial_direction = "Back" # "Front", "Left", "Right", "Back"
+stopping_time_in_seconds = 540 # 9 minutes
+initial_direction = "Front" # "Front", "Left", "Right", "Back"
 
 # code from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
 
@@ -164,16 +164,16 @@ class AutoNav(Node):
         global isTargetDetected, isDoneShooting
         self.get_logger().info('In target_callback')
         self.get_logger().info('I heard: "%s"' % msg.data)
-        if msg.data == 'Detected':
+        if (msg.data == 'Detected'):
             print('Target Detected')
             isTargetDetected = True
             isDoneShooting = False
-        elif msg.data == 'Annihilated':
+        elif (msg.data == 'Done'):
             print('Is Done shooting')
             isDoneShooting = True
             isTargetDetected = False
         else:
-            print('Searching')
+            print('No Target Detected')
             isTargetDetected = False
 
     def odom_callback(self, msg):
@@ -302,8 +302,6 @@ class AutoNav(Node):
 
     def pick_direction(self):
 
-        self.get_logger().info("IN PICK DIRECTION")
-
         # lrfront = (self.laser_range[front_angles] < float(stop_distance)).nonzero()
         # lrfrontleft = (self.laser_range[frontleft_angles] < float(stop_distance)).nonzero()
         # lrleft = (self.laser_range[ninety_degrees_left_side_angles] < float(stop_distance)).nonzero()
@@ -324,8 +322,8 @@ class AutoNav(Node):
         d = 0.28
         # Set turning speeds (to the left) in rad/s
         # These values were determined by trial and error.
-        self.turning_speed_wf_fast = 1.0  # Fast turn ideal = 1.0
-        self.turning_speed_wf_slow = 0.50  # Slow turn = 0.50
+        self.turning_speed_wf_fast = 0.75  # Fast turn ideal = 1.0
+        self.turning_speed_wf_slow = 0.40  # Slow turn = 0.50
         # Set movement speed
         self.forward_speed = speedchange
         # Set up twist message as msg
@@ -411,7 +409,8 @@ class AutoNav(Node):
         twist = Twist()
         twist.linear.x = -speedchange
         twist.angular.z = 0.0
-        lrback = (self.laser_range[back_angles] < float(0.40)).nonzero()
+        lrback = (self.laser_range[back_angles] < float(
+            0.40)).nonzero()
         self.publisher_.publish(twist)
         while len(lrback[0]) <= 0:
             time.sleep(1)
