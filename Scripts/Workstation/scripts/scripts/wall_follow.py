@@ -302,6 +302,8 @@ class AutoNav(Node):
 
     def pick_direction(self):
 
+        self.get_logger().info("IN PICK DIRECTION")
+
         # lrfront = (self.laser_range[front_angles] < float(stop_distance)).nonzero()
         # lrfrontleft = (self.laser_range[frontleft_angles] < float(stop_distance)).nonzero()
         # lrleft = (self.laser_range[ninety_degrees_left_side_angles] < float(stop_distance)).nonzero()
