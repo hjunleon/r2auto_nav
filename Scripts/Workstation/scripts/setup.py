@@ -24,7 +24,7 @@ setup(
             'command_sub = scripts.command_test_sub:main',
             'command_test_pub = scripts.command_test_pub:main',
             'command_pub = scripts.command_pub:main',
-            'wall_follow = scripts.wall_follower:main'
+            'wall_follow = scripts.wall_follow:main'
         ],
     },
 )
