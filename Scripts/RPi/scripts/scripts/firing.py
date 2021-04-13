@@ -96,10 +96,11 @@ class FiringSys(Node):
         ccw = 1  # counter clockwise
         delay = 3000 * (10 ** -6)
 
-        pi.write(STEPPER_EN, 0)  # start stepper
+        # pi.write(STEPPER_EN, 0)  # start stepper
 
         if step_limit > self.yaw > -step_limit and self.dc_done == 0:
             if array[0] < 0:
+                pi.write(STEPPER_EN, 0)  # start stepper
                 pi.write(DIR, cw)
                 print("Pan left")
                 for i in range(abs(int(array[0] // 1.8)) * teeth_scale):
@@ -114,6 +115,7 @@ class FiringSys(Node):
                     # else:
                     #     continue
             elif array[0] > 0:
+                pi.write(STEPPER_EN, 0)  # start stepper
                 pi.write(DIR, ccw)
                 print("Pan right")
                 for i in range(abs(int(array[0] // 1.8)) * teeth_scale):
