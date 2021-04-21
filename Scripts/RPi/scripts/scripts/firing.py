@@ -37,7 +37,7 @@ pi.set_PWM_frequency(M_PWM, 1000)  # motor pwm at 1000 hz
 pi.set_servo_pulsewidth(Tilt_PWM, 1650)  # upwards: 1510, flat: 1840
 pi.set_servo_pulsewidth(Loading_PWM, 700)  # forward: 700, backwards: 1800
 pi.set_PWM_dutycycle(M_PWM, 0)
-pi.write(STEPPER_EN, 1)
+pi.write(STEPPER_EN, 1) # CHANGE TO 0 TO ENABLE
 
 
 class FiringSys(Node):
@@ -101,7 +101,7 @@ class FiringSys(Node):
 
         if step_limit > self.yaw > -step_limit and self.dc_done == 0:
             if array[0] < 0:
-                pi.write(STEPPER_EN, 0)  # start stepper
+                pi.write(STEPPER_EN, 0)  # start stepper COMMENT OUT IF NEEDED
                 pi.write(DIR, cw)
                 print("Pan left")
                 for i in range(abs(int(array[0] // 1.8)) * teeth_scale):
@@ -112,7 +112,7 @@ class FiringSys(Node):
                     sleep(delay)
                     self.yaw -= 1
             elif array[0] > 0:
-                pi.write(STEPPER_EN, 0)  # start stepper
+                pi.write(STEPPER_EN, 0)  # start stepper COMMENT OUT IF NEEDED
                 pi.write(DIR, ccw)
                 print("Pan right")
                 for i in range(abs(int(array[0] // 1.8)) * teeth_scale):

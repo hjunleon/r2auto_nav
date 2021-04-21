@@ -32,7 +32,7 @@ from PIL import Image
 
 # constants
 rotatechange = 0.5
-speedchange = 0.10
+speedchange = 0.15
 occ_bins = [-1, 0, 100, 101]
 stop_distance = 0.40
 map_bg_color = 1
@@ -53,8 +53,8 @@ isTargetDetected = False
 isDoneShooting = False
 
 # To change before starting test
-stopping_time_in_seconds = 1200
-initial_direction = "Back" # "Front", "Left", "Right", "Back"
+stopping_time_in_seconds = 540 # 9 minutes
+initial_direction = "Front" # "Front", "Left", "Right", "Back"
 
 # code from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
 
@@ -95,7 +95,7 @@ class AutoNav(Node):
         # Node subscribes to messages from the targeting node
         self.targeting_subscription = self.create_subscription(
             String,
-            'targeting_status',
+            'fire_done',
             self.target_callback,
             10)
         self.targeting_subscription  # prevent unused variable warning
@@ -159,6 +159,7 @@ class AutoNav(Node):
         self.current_x = curr_state[0]
         self.current_y = curr_state[1]
         self.current_yaw = curr_state[2]
+
 
     def target_callback(self, msg):
         global isTargetDetected, isDoneShooting
@@ -302,8 +303,6 @@ class AutoNav(Node):
 
     def pick_direction(self):
 
-        self.get_logger().info("IN PICK DIRECTION")
-
         # lrfront = (self.laser_range[front_angles] < float(stop_distance)).nonzero()
         # lrfrontleft = (self.laser_range[frontleft_angles] < float(stop_distance)).nonzero()
         # lrleft = (self.laser_range[ninety_degrees_left_side_angles] < float(stop_distance)).nonzero()
@@ -324,8 +323,8 @@ class AutoNav(Node):
         d = 0.28
         # Set turning speeds (to the left) in rad/s
         # These values were determined by trial and error.
-        self.turning_speed_wf_fast = 1.0  # Fast turn ideal = 1.0
-        self.turning_speed_wf_slow = 0.50  # Slow turn = 0.50
+        self.turning_speed_wf_fast = 0.75  # Fast turn ideal = 1.0
+        self.turning_speed_wf_slow = 0.40  # Slow turn = 0.50
         # Set movement speed
         self.forward_speed = speedchange
         # Set up twist message as msg
